@@ -1,9 +1,11 @@
 from flask import Flask, Blueprint
-
+from controller.controller import controller
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_pyfile('../../config/app_config.cfg')
+
+    app.register_blueprint(controller)
 
     return app
 
