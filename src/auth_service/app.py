@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint
-from controller.controller import controller
+from controllers.controller import controller
 
 def create_app() -> Flask:
     app = Flask(__name__)

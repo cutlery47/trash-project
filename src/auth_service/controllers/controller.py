@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-controller = Blueprint("controller", __name__, url_prefix="/api/v1/auth")
+controller = Blueprint("controllers", __name__, url_prefix="/api/v1/auth")
 
 
 @controller.post("/login")
