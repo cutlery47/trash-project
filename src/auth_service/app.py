@@ -1,11 +1,12 @@
-from flask import Flask, Blueprint
-from controllers.controller import controller
+from flask import Flask
+from routes.router import router
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    app.config.from_pyfile('../../config/app_config.cfg')
+    app.config.from_pyfile('config/app_config.cfg')
 
-    app.register_blueprint(controller)
+    app.register_blueprint(router)
 
     return app
 

@@ -1,27 +1,10 @@
-from flask import Blueprint
+from flask import Blueprint, request
 
-controller = Blueprint("controllers", __name__, url_prefix="/api/v1/auth")
+from src.auth_service.controllers.signup_controller import SignUpController
 
-
-@controller.post("/login")
-def log_in_controller():
-    return '123123'
+router = Blueprint("routes", __name__, url_prefix="/api/v1/auth")
 
 
-@controller.post("/signup")
-def sign_up_controller():
-    return '123123'
-
-
-@controller.get("/perms/<int:user_id>")
-def permissions_controller():
-    return 'somesome'
-
-
-@controller.get("/roles/<int:user_id>")
-def roles_controller():
-    return 'smth'
-
-@controller.delete("<int:user_id>")
-def auth_delete_controller():
-    return "deleted"
+@router.post("/signup")
+def signup():
+    return SignUpController(request).handle()
