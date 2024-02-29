@@ -1,27 +1,21 @@
-from flask import Blueprint
-
-controller = Blueprint("controllers", __name__, url_prefix="/api/v1/auth")
-
-
-@controller.post("/login")
-def log_in_controller():
-    return '123123'
+from abc import ABC, abstractmethod
+from flask import Request
 
 
-@controller.post("/signup")
-def sign_up_controller():
-    return '123123'
+class Controller(ABC):
+    desired_keys: list
+    request: Request
+    data: dict
 
+    @abstractmethod
+    def __init__(self, request):
+        raise NotImplementedError
 
-@controller.get("/perms/<int:user_id>")
-def permissions_controller():
-    return 'somesome'
+    @abstractmethod
+    def _integrity_check(self):
+        raise NotImplementedError
 
+    @abstractmethod
+    def handle(self):
+        raise NotImplementedError
 
-@controller.get("/roles/<int:user_id>")
-def roles_controller():
-    return 'smth'
-
-@controller.delete("<int:user_id>")
-def auth_delete_controller():
-    return "deleted"

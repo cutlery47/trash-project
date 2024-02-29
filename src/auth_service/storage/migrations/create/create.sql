@@ -1,5 +1,5 @@
 --NOT A FINAL VERSION--
 CREATE TABLE Users (
-
+    id      UNSIGNED INT PRIMARY KEY,
 
 )
