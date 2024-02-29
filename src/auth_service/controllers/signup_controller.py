@@ -1,9 +1,8 @@
 from builtins import classmethod
 from flask import Request
 
-from src.auth_service.services.services import SignUpService
-from controller import Controller
-
+from src.auth_service.services.signup_service import SignUpService
+from .controller import Controller
 
 
 class SignUpController(Controller):
@@ -17,7 +16,7 @@ class SignUpController(Controller):
     @classmethod
     def handle(cls):
         cls._integrity_check()
-        return SignUpService(cls.data)
+        return SignUpService.handle(cls.data)
 
     @classmethod
     def _integrity_check(cls):

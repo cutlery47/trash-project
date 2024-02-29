@@ -11,5 +11,5 @@ class Role:
 class User:
     id: int
     role_id: int
-    mail: str
+    email: str
     password: str

@@ -1,8 +1,13 @@
-from repository import Repository
-from ..entities.enitities import User
+from builtins import classmethod
+
+from .repository import Repository
+from ..entities.entities import User
 
 
 class UserRepository(Repository[User]):
+    user: User
 
-    def __init__(self):
-        pass
+    @classmethod
+    def __init__(cls, user: User):
+        cls.user = user
+
