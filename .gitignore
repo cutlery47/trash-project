@@ -1,4 +1,4 @@
-*.cfg
+*.json
 *.excalidraw
 # Byte-compiled / optimized / DLL files
 __pycache__/

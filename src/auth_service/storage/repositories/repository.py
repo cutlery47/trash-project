@@ -27,6 +27,3 @@ class Repository[Entity](ABC):
     @abstractmethod
     def delete(self, id_: int) -> None:
         raise NotImplementedError
-
-
-
