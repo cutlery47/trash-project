@@ -1,4 +1,3 @@
-from flask import Request
 from builtins import classmethod
 
 from src.auth_service.storage.entities.entities import User, Role
@@ -11,5 +10,5 @@ class SignUpService:
     @classmethod
     def handle(cls, data: dict):
         user = UserSerializer.serialize(data)
-        UserRepository(user)
-
+        UserRepository(user).get(123123)
+        return "123123"
