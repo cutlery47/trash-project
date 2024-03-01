@@ -26,7 +26,7 @@ class Migrator:
     @classmethod
     def exec(cls):
         # iterating over each migration in the specified directory
-        migrations = os.listdir(cls.dirpath)
+        migrations = sorted(os.listdir(cls.dirpath))
         for migration in migrations:
             if migration.endswith(".sql"):
                 cls._handle_migration(migration)
