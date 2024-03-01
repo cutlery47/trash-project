@@ -6,7 +6,7 @@ from .controller import Controller
 
 
 class SignUpController(Controller):
-    desired_keys = ['id', 'role', 'email', 'password']
+    desired_keys = ['id', 'role_id', 'email', 'password']
     data = {}
 
     @classmethod
