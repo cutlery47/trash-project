@@ -1,10 +1,10 @@
 from flask import Blueprint, request
 
-from src.auth_service.controllers.signup_controller import SignUpController
+from src.auth_service.controllers.user_controller import UserController
 
 router = Blueprint("routes", __name__, url_prefix="/api/v1/auth")
 
 
-@router.post("/signup")
-def signup():
-    return SignUpController(request).handle()
+@router.get("/users/get/<int:user_id>")
+def get_user(user_id):
+    return UserController(request).handle_get(user_id)

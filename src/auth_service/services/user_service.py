@@ -5,10 +5,10 @@ from src.auth_service.storage.entities.serializers import UserSerializer
 from src.auth_service.storage.repositories.user_repository import UserRepository
 
 
-class SignUpService:
+class UserService:
 
     @classmethod
-    def handle(cls, data: dict):
-        user = UserSerializer.serialize(data)
-        UserRepository(user).get(123123)
-        return "123123"
+    def get(cls, id_: int):
+        repo = UserRepository()
+        return repo.get(id_)
+
