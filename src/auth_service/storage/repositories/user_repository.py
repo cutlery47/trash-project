@@ -1,4 +1,5 @@
 from pypika import Query, Table
+from dataclasses import fields
 import psycopg2
 
 from .repository import Repository
@@ -8,9 +9,7 @@ from src.auth_service.config.db_config import DBConfig
 
 class UserRepository(Repository[User]):
 
-    def __init__(self, user: User):
-        self.user = user
-
+    def __init__(self):
         # connecting to db
         self.connection = psycopg2.connect(f"dbname={DBConfig.dbname} user={DBConfig.user}")
         self.cursor = self.connection.cursor()
@@ -22,11 +21,11 @@ class UserRepository(Repository[User]):
     def get(self, id_: int) -> User:
         users = Table("users")
 
+        # iterating over each field of User entity
+        user_fields = tuple(field.name for field in fields(User))
+
         q = Query.from_(users).select(
-            users.id,
-            users.role_id,
-            users.email,
-            users.password
+            *user_fields
         ).where(
             users.id == id_
         ).get_sql()
@@ -34,14 +33,10 @@ class UserRepository(Repository[User]):
 
         result = self.cursor.fetchone()
 
-        # TODO: return column names as well in order to provide User class constructor with already mapped values
-
-        # return User(
-        #     {
-        #         result[0]
-        #     }
-        # )
-
+        if result:
+            return User(*result)
+        else:
+            return User()
 
     def add(self, data: User) -> None:
         pass

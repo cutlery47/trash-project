@@ -3,13 +3,13 @@ from dataclasses import dataclass
 
 @dataclass
 class Role:
-    id: int
-    name: str
+    id: int = None
+    name: str = None
 
 
 @dataclass
 class User:
-    id: int
-    role_id: int
-    email: str
-    password: str
+    id: int = None
+    role_id: int = None
+    email: str = None
+    password: str = None
