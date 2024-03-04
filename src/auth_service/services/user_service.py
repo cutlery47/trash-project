@@ -9,3 +9,6 @@ class UserService:
     def get(self, id_: int):
         return self.repo.get(id_)
 
+    def get_all(self):
+        return self.repo.get_all()
+

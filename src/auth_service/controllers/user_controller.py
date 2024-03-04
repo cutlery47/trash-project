@@ -16,7 +16,8 @@ class UserController(Controller[User]):
         return self.serializer.deserialize(response)
 
     def handle_get_all(self):
-        return 123
+        responses = self.service.get_all()
+        return [self.serializer.deserialize(response) for response in responses]
 
     def _integrity_check(self):
         pass
