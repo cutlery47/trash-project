@@ -9,21 +9,21 @@ class Repository[Entity](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get(self, id_: int) -> Entity:
+    def get(self, id_: int) -> Entity | str:
         raise NotImplementedError
 
     @abstractmethod
-    def get_all(self) -> list[Entity]:
+    def get_all(self) -> list[Entity] | str:
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, data: Entity) -> None:
+    def create(self, entity_data: Entity) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, id_: int, data: Entity) -> None:
+    def update(self, id_: int, data: Entity) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, id_: int) -> None:
+    def delete(self, id_: int) -> str:
         raise NotImplementedError

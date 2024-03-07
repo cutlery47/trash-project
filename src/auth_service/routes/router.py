@@ -14,9 +14,19 @@ def setup():
 
 @router.get("/users/get/<int:user_id>")
 def get_user(user_id):
-    return UserController(request).handle_get(user_id)
+    return UserController(request).get(user_id)
 
 
 @router.get("/users/get/")
 def get_all_users():
-    return UserController(request).handle_get_all()
+    return UserController(request).get_all()
+
+
+@router.post("/users/create/")
+def create_user():
+    return UserController(request).create()
+
+
+@router.post("/users/create_admin/")
+def create_admin():
+    return UserController(request).create_admin()

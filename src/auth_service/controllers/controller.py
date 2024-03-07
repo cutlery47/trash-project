@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from flask import Request
+from flask import Response
 
 
 class Controller[Entity](ABC):
@@ -9,15 +9,19 @@ class Controller[Entity](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def handle_get(self, id_: int):
+    def get(self, id_: int) -> Response:
         raise NotImplementedError
 
     @abstractmethod
-    def handle_get_all(self):
+    def get_all(self) -> Response:
         raise NotImplementedError
 
     @abstractmethod
-    def _integrity_check(self):
+    def create(self) -> Response:
+        raise NotImplementedError
+
+    @abstractmethod
+    def create_admin(self) -> Response:
         raise NotImplementedError
 
 
