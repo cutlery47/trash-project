@@ -4,7 +4,7 @@ import psycopg2
 
 from .repository import Repository
 from src.auth_service.storage.entities.entities import User
-from src.auth_service.config.db_config import DBConfig
+from src.auth_service.config.database.db_config import DBConfig
 
 
 class UserRepository(Repository[User]):

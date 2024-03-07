@@ -1,3 +1,6 @@
+# DEPRECATED
+# DEPRECATED
+# DEPRECATED
 from dataclasses import dataclass
 import json
 

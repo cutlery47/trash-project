@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import json
 
-config_path = "src/auth_service/config/db_config.json"
+config_path = "config/database/db_config.json"
 
 
 @dataclass

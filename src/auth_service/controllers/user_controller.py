@@ -22,26 +22,3 @@ class UserController(Controller[User]):
     def _integrity_check(self):
         pass
 
-
-# class SignUpController(Controller):
-#     desired_keys = ['id', 'role_id', 'email', 'password']
-#     data = {}
-#
-#     @classmethod
-#     def __init__(cls, request: Request):
-#         cls.request = request
-#
-#     @classmethod
-#     def handle(cls):
-#         cls._integrity_check()
-#         return SignUpService.handle(cls.data)
-#
-#     @classmethod
-#     def _integrity_check(cls):
-#         for key in cls.desired_keys:
-#             if cls.request.form.get(key):
-#                 cls.data[key] = cls.request.form[key]
-#             else:
-#                 raise KeyError(f"{key} is not provided")
-
-

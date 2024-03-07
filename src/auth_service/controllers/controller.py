@@ -3,7 +3,6 @@ from flask import Request
 
 
 class Controller[Entity](ABC):
-    entity: Entity
 
     @abstractmethod
     def __init__(self, request):
