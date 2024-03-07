@@ -18,7 +18,7 @@ class UserRepository(Repository[User]):
         self.cursor.close()
         self.connection.close()
 
-    def get(self, id_: int) -> User | str:
+    def get(self, id_: int) -> User:
         users = Table("users")
 
         # iterating over each field of User entity
@@ -36,9 +36,9 @@ class UserRepository(Repository[User]):
         if user_data:
             return User(*user_data)
 
-        return "None"
+        raise psycopg2.DataError("404: User was not found by specified id...")
 
-    def get_all(self) -> list[User] | str:
+    def get_all(self) -> list[User]:
         users = Table("users")
 
         # iterating over each field of User entity
@@ -53,8 +53,8 @@ class UserRepository(Repository[User]):
 
         if users_data:
             return [User(*user_data) for user_data in users_data]
-        else:
-            return "None"
+
+        raise psycopg2.DataError("404: Users were not found...")
 
     def create(self, user_data: User) -> str:
         users = Table("users")
@@ -66,11 +66,7 @@ class UserRepository(Repository[User]):
             user_data.password
         ).get_sql()
         self.cursor.execute(q)
-
-        try:
-            self.connection.commit()
-        except psycopg2.DataError as err:
-            return err.pgerror
+        self.connection.commit()
 
         return "200"
 

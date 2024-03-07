@@ -1,3 +1,4 @@
+import psycopg2
 from flask import make_response, Response
 
 from src.auth_service.services.user_service import UserService
@@ -14,31 +15,41 @@ class UserController(Controller[User]):
         self.serializer = UserSerializer()
 
     def get(self, id_: int) -> Response:
-        response = self.service.get(id_)
-        if response != "None":
-            return make_response(self.serializer.deserialize(response), 200)
-        else:
-            return make_response(response, 404)
+        try:
+            response = self.service.get(id_)
+        except psycopg2.DataError as err:
+            return make_response(str(err), 404)
+
+        return make_response(self.serializer.deserialize(response), 200)
 
     def get_all(self) -> Response:
-        responses = self.service.get_all()
-        if responses != "None":
-            return make_response([self.serializer.deserialize(response) for response in responses], 2)
-        else:
-            return make_response(responses, 404)
+        try:
+            responses = self.service.get_all()
+        except psycopg2.DataError as err:
+            return make_response(str(err), 404)
+
+        return make_response([UserSerializer.deserialize(response) for response in responses], 200)
 
     def create(self) -> Response:
-        self._create_data_check()
+        try:
+            self._create_data_check()
+        except KeyError as err:
+            return make_response(str(err), 400)
+
         user = UserSerializer.serialize(self.data)
         response = self.service.create(user)
-        # temporary
+
         return make_response("200") if response else make_response("404", 404)
 
     def create_admin(self) -> Response:
-        self._create_data_check()
+        try:
+            self._create_data_check()
+        except KeyError as err:
+            return make_response(str(err), 400)
+
         admin = UserSerializer.serialize(self.data)
         response = self.service.create(admin)
-        # temporary
+
         return make_response("200") if response else make_response("404", 404)
 
     def _create_data_check(self):
@@ -46,5 +57,5 @@ class UserController(Controller[User]):
 
         for key in desired_keys:
             if not self.data.get(key):
-                raise KeyError(f"{key} is not provided")
+                raise KeyError(f"400: {key} is not provided")
 
