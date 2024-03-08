@@ -30,3 +30,13 @@ def create_user():
 @router.post("/users/create_admin/")
 def create_admin():
     return UserController(request).create_admin()
+
+
+@router.delete("/users/delete/<int:user_id>")
+def delete_user(user_id):
+    return UserController(request).delete(user_id)
+
+
+@router.put("/users/update/<int:user_id>")
+def update_user(user_id):
+    return UserController(request).update(user_id)

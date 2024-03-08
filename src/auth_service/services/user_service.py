@@ -27,8 +27,16 @@ class UserService:
         admin.role_id = 1
         return self.repo.create(admin)
 
+    def delete(self, id_):
+        return self.repo.delete(id_)
+
+    def update(self, id_, user: User):
+        return self.repo.update(id_, user)
+
     def randomize_id(self, lower_bound: int, upper_bound: int):
         while True:
             id_ = random.randint(lower_bound, upper_bound)
-            if not self.get(id_):
+            try:
+                self.get(id_)
+            except psycopg2.DataError:
                 return id_

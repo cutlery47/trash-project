@@ -24,5 +24,13 @@ class Controller[Entity](ABC):
     def create_admin(self) -> Response:
         raise NotImplementedError
 
+    @abstractmethod
+    def delete(self, user_id) -> Response:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update(self, user_id) -> Response:
+        raise NotImplementedError
+
 
 

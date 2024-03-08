@@ -17,13 +17,13 @@ class Repository[Entity](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def create(self, entity_data: Entity) -> str:
+    def create(self, entity_data: Entity) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, id_: int, data: Entity) -> str:
+    def update(self, id_: int, data: Entity) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, id_: int) -> str:
+    def delete(self, id_: int) -> bool:
         raise NotImplementedError
