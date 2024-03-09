@@ -1,7 +1,8 @@
-from exceptions import DBNameNotSpecified, UserNotSpecified, PathNotSpecified
 import argparse
 import psycopg2
 import os
+
+from src.migrator.exceptions import DBNameNotSpecified, UserNotSpecified, PathNotSpecified
 
 
 class Migrator:
