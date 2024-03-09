@@ -1,7 +1,6 @@
 import psycopg2
-from flask import make_response, Response, g
+from flask import make_response, Response, request
 
-from src.auth_service.services.user_service import UserService
 from .controller import Controller
 from src.auth_service.storage.entities.entities import User
 from src.auth_service.storage.entities.serializers import UserSerializer
@@ -9,9 +8,8 @@ from src.auth_service.storage.entities.serializers import UserSerializer
 
 class UserController(Controller[User]):
 
-    def __init__(self, request):
-        self.data = request.json
-        self.service = UserService()
+    def __init__(self, service):
+        self.service = service
         self.serializer = UserSerializer()
 
     def get(self, id_: int) -> Response:
@@ -20,11 +18,9 @@ class UserController(Controller[User]):
             response = self.service.get(id_)
 
         except psycopg2.DataError as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 404)
 
         except Exception as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 400)
 
         return make_response(self.serializer.deserialize(response), 200)
@@ -35,11 +31,9 @@ class UserController(Controller[User]):
             responses = self.service.get_all()
 
         except psycopg2.DataError as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 404)
 
         except Exception as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 400)
 
         return make_response([UserSerializer.deserialize(response) for response in responses], 200)
@@ -50,16 +44,13 @@ class UserController(Controller[User]):
             user = UserSerializer.serialize(self.data)
             self.service.create(user)
 
-        except TypeError as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
+        except TypeError:
             return make_response("Bad input data", 400)
 
         except KeyError as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 400)
 
         except Exception as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 400)
 
         return make_response("200")
@@ -70,16 +61,13 @@ class UserController(Controller[User]):
             admin = UserSerializer.serialize(self.data)
             self.service.create_admin(admin)
 
-        except TypeError as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
+        except TypeError:
             return make_response("Bad input data", 400)
 
         except KeyError as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 400)
 
         except Exception as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 400)
 
         return make_response("200")
@@ -90,7 +78,6 @@ class UserController(Controller[User]):
             self.service.delete(id_)
 
         except Exception as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 400)
 
         return make_response("200")
@@ -102,11 +89,9 @@ class UserController(Controller[User]):
             self.service.update(id_, user)
 
         except TypeError as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response("Bad input data", 400)
 
         except Exception as err:
-            g.logger.error(f"{type(err).__name__}: {str(err)}")
             return make_response(str(err), 400)
 
         return make_response("200")

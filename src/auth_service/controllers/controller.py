@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
 from flask import Response
 
+from src.auth_service.services.user_service import UserService
+
 
 class Controller[Entity](ABC):
 
     @abstractmethod
-    def __init__(self, request):
+    def __init__(self, service: UserService):
         raise NotImplementedError
 
     @abstractmethod

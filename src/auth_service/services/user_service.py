@@ -2,14 +2,13 @@ import random
 
 import psycopg2
 
-from src.auth_service.storage.repositories.user_repository import UserRepository
 from src.auth_service.storage.entities.entities import User
 
 
 class UserService:
 
-    def __init__(self):
-        self.repo = UserRepository()
+    def __init__(self, repo):
+        self.repo = repo
 
     def get(self, id_: int):
         return self.repo.get(id_)

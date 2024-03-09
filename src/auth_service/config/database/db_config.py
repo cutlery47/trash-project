@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 import json
 
-config_path = "config/database/db_config.json"
 
-
-@dataclass
 class DBConfig:
-    dbname = json.load(open(config_path)).get("DBNAME")
-    user = json.load(open(config_path)).get("USER")
+
+    def __init__(self, config_path="src/auth_service/config/database/db_config.json"):
+        self.dbname = json.load(open(config_path)).get("DBNAME")
+        self.user = json.load(open(config_path)).get("USER")

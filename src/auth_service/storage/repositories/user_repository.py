@@ -9,9 +9,10 @@ from src.auth_service.config.database.db_config import DBConfig
 
 class UserRepository(Repository[User]):
 
-    def __init__(self):
+    def __init__(self, db_config):
         # connecting to db
-        self.connection = psycopg2.connect(f"dbname={DBConfig.dbname} user={DBConfig.user}")
+        config = DBConfig(db_config)
+        self.connection = psycopg2.connect(f"dbname={config.dbname} user={config.user}")
         self.cursor = self.connection.cursor()
 
     def __del__(self):
@@ -101,4 +102,3 @@ class UserRepository(Repository[User]):
         self.cursor.fetchone()
 
         return True
-
