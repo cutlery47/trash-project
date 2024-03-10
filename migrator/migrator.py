@@ -2,8 +2,6 @@ import argparse
 import psycopg2
 import os
 
-from src.migrator.exceptions import DBNameNotSpecified, UserNotSpecified, PathNotSpecified
-
 
 class Migrator:
     dbname = None
@@ -11,17 +9,17 @@ class Migrator:
     dirpath = None
 
     @classmethod
-    def __init__(cls, dbname: str = None, user: str = None, dirpath: str = None):
+    def __init__(cls, dbname: str = None, user: str = 'postgres', dirpath: str = None):
         if dbname is None:
-            raise DBNameNotSpecified
+            raise AttributeError
         cls.dbname = dbname
 
         if user is None:
-            raise UserNotSpecified
+            raise AttributeError
         cls.user = user
 
         if dirpath is None:
-            raise PathNotSpecified
+            raise AttributeError
         cls.dirpath = dirpath
 
     @classmethod
