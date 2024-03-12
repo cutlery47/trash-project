@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from flask import Response
 
-from src.auth_service.services.user_service import UserService
+from microservices.auth_service.services.user_service import UserService
 
 
 class Controller[Entity](ABC):
