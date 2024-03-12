@@ -3,29 +3,30 @@ import pytest
 import json
 
 
-from src.auth_service.app import TrashAssApplication
+from microservices.auth_service.app import TrashAssApplication
 from migrator.migrator import Migrator
 
 db_config = "tests/config/db_config.json"
 
 user = json.load(open(db_config)).get('USER')
 dbname = json.load(open(db_config)).get('DBNAME')
-setup_path = "src/auth_service/storage/migrations/setup/"
-teardown_path = "src/auth_service/storage/migrations/teardown/"
+setup_path = "microservices/auth_service/storage/migrations/setup/"
+teardown_path = "microservices/auth_service/storage/migrations/teardown/"
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def app():
     app = TrashAssApplication.create(db_config=db_config)
+    app.testing = True
 
-    # try:
-    #     # setup_database()
-    # except DatabaseError as err:
-    #     print(f"Error: {str(err)}")
-    #     print("Tables already exist --- not creating new ones")
+    try:
+        setup_database()
+    except DatabaseError:
+        print("Tables already exist --- not creating new ones")
 
     yield app
-    #teardown_database()
+
+    teardown_database()
 
 
 @pytest.fixture()
