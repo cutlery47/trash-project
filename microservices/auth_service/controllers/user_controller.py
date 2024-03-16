@@ -1,51 +1,57 @@
 import psycopg2
-from flask import make_response, Response, request
+from flask import make_response, Response, request, current_app
 
-from .controller import Controller
-from microservices.auth_service.storage.entities.entities import User
+from microservices.auth_service.services.user_service import UserService
 from microservices.auth_service.storage.entities.serializers import UserSerializer
 
-# TODO: hide error descriptions from users
+from microservices.auth_service.exceptions import repository_exceptions, controller_exceptions
 
 
-class UserController(Controller[User]):
+class UserController:
 
-    def __init__(self, service):
+    def __init__(self, service: UserService):
         self.service = service
         self.serializer = UserSerializer()
 
     def get(self, id_: int) -> Response:
         # requires authorization
         try:
-            response = self.service.get(id_)
-        except psycopg2.Error:
-            return make_response("Unexpected error happened on the server", 500)
+            response = self.service.get(id_, True)
 
-        return make_response(self.serializer.deserialize(response), 200)
+        except repository_exceptions.UserNotFoundError as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
+            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+
+        return make_response(self.serializer.serialize(response), 200)
 
     def get_all(self) -> Response:
         # requires authorization
         try:
-            responses = self.service.get_all()
-        except psycopg2.Error:
-            return make_response("Unexpected error happened on the server", 500)
+            responses = self.service.get_all(True)
 
-        return make_response([UserSerializer.deserialize(response) for response in responses], 200)
+        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
+            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+
+        return make_response([UserSerializer.serialize(response) for response in responses], 200)
 
     def create(self) -> Response:
         try:
             self._forbidden_input_check(['id', 'role_id'], request.json)
             self._desired_input_check(['email', 'password'], request.json)
-        except KeyError as err:
-            return make_response(str(err), 400)
 
-        user = UserSerializer.serialize(request.json)
+        except (controller_exceptions.DesiredFieldsNotProvidedError,
+                controller_exceptions.ForbiddenFieldsProvidedError) as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        user = UserSerializer.deserialize(request.json)
 
         try:
-            if user == "create":
-                self.service.create(user)
-        except psycopg2.Error:
-            return make_response("Unexpected error happened on the server", 500)
+            self.service.create(user)
+
+        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
+            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response("200")
 
@@ -53,15 +59,18 @@ class UserController(Controller[User]):
         try:
             self._forbidden_input_check(['id', 'role_id'], request.json)
             self._desired_input_check(['email', 'password'], request.json)
-        except KeyError as err:
-            return make_response(str(err), 400)
 
-        admin = UserSerializer.serialize(request.json)
+        except (controller_exceptions.DesiredFieldsNotProvidedError,
+                controller_exceptions.ForbiddenFieldsProvidedError) as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        admin = UserSerializer.deserialize(request.json)
 
         try:
             self.service.create_admin(admin)
-        except psycopg2.Error:
-            return make_response("Unexpected error happened on the server", 500)
+
+        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
+            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response("200")
 
@@ -69,8 +78,12 @@ class UserController(Controller[User]):
         # requires authorization
         try:
             self.service.delete(id_)
-        except psycopg2.Error:
-            return make_response("Unexpected error happened on the server", 500)
+
+        except repository_exceptions.UserNotFoundError as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
+            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response("200")
 
@@ -78,17 +91,51 @@ class UserController(Controller[User]):
         # requires authorization
         try:
             self._forbidden_input_check(['id', 'role_id'], request.json)
-        except KeyError as err:
-            return make_response(str(err), 400)
 
-        user = UserSerializer.serialize(request.json)
+        except controller_exceptions.ForbiddenFieldsProvidedError as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        user = UserSerializer.deserialize(request.json)
 
         try:
             self.service.update(id_, user)
-        except psycopg2.Error:
-            return make_response("Unexpected error happened on the server", 500)
+
+        except repository_exceptions.UserNotFoundError as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
+            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response("200")
+
+    def get_user_role(self, id_) -> Response:
+        try:
+            role = self.service.get_user_role(id_)
+
+        except repository_exceptions.RoleNotFound as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
+            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+
+        return make_response(role)
+
+    def get_user_permissions(self, id_) -> Response:
+        try:
+            role = self.service.get_user_permissions(id_)
+
+        except repository_exceptions.PermissionsNotFoundError as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
+            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+
+        return make_response(role)
+
+    @staticmethod
+    def _make_response_from_exception(err: Exception, status: int, response: str) -> Response:
+        current_app.logger.error(f"{type(err).__name__}: {str(err)}")
+        return make_response(response, status)
 
     @staticmethod
     def _desired_input_check(desired_keys, request_json):
@@ -96,7 +143,7 @@ class UserController(Controller[User]):
 
         for key in desired_keys:
             if not request_json.get(key):
-                raise KeyError(f"Desired key: \"{key}\" is not provided")
+                raise controller_exceptions.DesiredFieldsNotProvidedError(f"Desired key: \"{key}\" is not provided")
 
     @staticmethod
     def _forbidden_input_check(forbidden_keys, request_json):
@@ -104,7 +151,7 @@ class UserController(Controller[User]):
 
         for key in forbidden_keys:
             if request_json.get(key):
-                raise KeyError(f"Forbidden key: \"{key}\" is provided")
+                raise controller_exceptions.ForbiddenFieldsProvidedError(f"Forbidden key: \"{key}\" is provided")
 
     @staticmethod
     def _get_url_subdomain_by_index(index):
