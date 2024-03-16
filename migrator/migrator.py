@@ -36,7 +36,7 @@ class Migrator:
         fd = os.open(filepath, os.O_RDONLY)
         script = os.read(fd, os.stat(filepath).st_size).decode()
 
-        connection = psycopg2.connect(f"dbname={cls.dbname} user={cls.user}")
+        connection = psycopg2.connect(database=cls.dbname, user=cls.user)
         try:
             cur = connection.cursor()
             cur.execute(script)
@@ -48,7 +48,6 @@ class Migrator:
         connection.close()
 
         os.close(fd)
-
 
 def handle_args(*args):
     parser = argparse.ArgumentParser()
