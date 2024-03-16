@@ -1,20 +1,25 @@
 import random
 
-import psycopg2
+from microservices.auth_service.storage.entities.entities import User
+from microservices.auth_service.storage.repositories.user_repository import UserRepository
 
-from src.auth_service.storage.entities.entities import User
+from microservices.auth_service.exceptions import repository_exceptions
 
 
 class UserService:
 
-    def __init__(self, repo):
+    def __init__(self, repo: UserRepository):
         self.repo = repo
 
-    def get(self, id_: int):
-        return self.repo.get(id_)
+    def get(self, id_: int, secure: bool):
+        # "secure" parameter removes password from response body
+        user = self.repo.get(id_, secure)
+        return user
 
-    def get_all(self):
-        return self.repo.get_all()
+    def get_all(self, secure: bool):
+        # "secure" parameter removes passwords from response body
+        users = self.repo.get_all(secure)
+        return users
 
     def create(self, user: User):
         user.id = self.randomize_id(1, 2 ** 31 - 1)
@@ -32,10 +37,16 @@ class UserService:
     def update(self, id_, user: User):
         return self.repo.update(id_, user)
 
+    def get_user_role(self, id_):
+        return self.repo.get_role(id_)
+
+    def get_user_permissions(self, id_):
+        return self.repo.get_permissions(id_)
+
     def randomize_id(self, lower_bound: int, upper_bound: int):
         while True:
             id_ = random.randint(lower_bound, upper_bound)
             try:
-                self.get(id_)
-            except psycopg2.DataError:
+                self.get(id_, False)
+            except repository_exceptions.UserNotFoundError:
                 return id_

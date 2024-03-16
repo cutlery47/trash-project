@@ -1,29 +1,41 @@
 from pypika import Query, Table
 from dataclasses import fields
 import psycopg2
+import sys
 
-from .repository import Repository
-from src.auth_service.storage.entities.entities import User
-from src.auth_service.config.database.db_config import DBConfig
+from microservices.auth_service.storage.entities.entities import User
+from microservices.auth_service.config.database.db_config import DBConfig
+
+from microservices.auth_service.exceptions import repository_exceptions
 
 
-class UserRepository(Repository[User]):
+# noinspection PyTypeChecker
+class UserRepository:
 
     def __init__(self, db_config):
         # connecting to db
         config = DBConfig(db_config)
-        self.connection = psycopg2.connect(f"dbname={config.dbname} user={config.user}")
+
+        try:
+            self.connection = psycopg2.connect(database=config.dbname, user=config.user)
+        except psycopg2.Error:
+            raise (repository_exceptions.
+                   PostgresConnError("Couldn't establish database connection..."))
+
         self.cursor = self.connection.cursor()
 
     def __del__(self):
         self.cursor.close()
         self.connection.close()
 
-    def get(self, id_: int) -> User:
-        users = Table("users")
+    def get(self, id_: int, secure: bool) -> User:
+        users = Table("Users")
 
         # iterating over each field of User entity
-        user_fields = tuple(field.name for field in fields(User))
+        if secure:
+            user_fields = tuple(field.name for field in fields(User) if field.name != "password")
+        else:
+            user_fields = tuple(field.name for field in fields(User))
 
         q = Query.from_(users).select(
             *user_fields
@@ -31,32 +43,35 @@ class UserRepository(Repository[User]):
             users.id == id_
         ).get_sql()
         self.cursor.execute(q)
+        self.connection.commit()
 
         user_data = self.cursor.fetchone()
         if user_data:
             return User(*user_data)
 
-        raise psycopg2.DataError("404: User was not found by specified id...")
+        raise (repository_exceptions.
+               UserNotFoundError("User was not found by specified id..."))
 
-    def get_all(self) -> list[User]:
-        users = Table("users")
+    def get_all(self, secure: bool) -> list[User]:
+        users = Table("Users")
 
         # iterating over each field of User entity
-        user_fields = tuple(field.name for field in fields(User))
+        if secure:
+            user_fields = tuple(field.name for field in fields(User) if field.name != "password")
+        else:
+            user_fields = tuple(field.name for field in fields(User))
 
         q = Query.from_(users).select(
             *user_fields
         ).get_sql()
         self.cursor.execute(q)
+        self.connection.commit()
 
         users_data = self.cursor.fetchall()
-        if users_data:
-            return [User(*user_data) for user_data in users_data]
-
-        raise psycopg2.DataError("404: Users were not found...")
+        return [User(*user_data) for user_data in users_data]
 
     def create(self, user_data: User) -> bool:
-        users = Table("users")
+        users = Table("Users")
 
         q = Query.into(users).insert(
             user_data.id,
@@ -67,22 +82,22 @@ class UserRepository(Repository[User]):
         self.cursor.execute(q)
         self.connection.commit()
 
-        # is used to check for any psql errors
-        self.cursor.fetchone()
-
         return True
 
     def delete(self, id_: int) -> bool:
-        users = Table("users")
+        users = Table("Users")
 
         q = Query.from_(users).delete().where(
             users.id == id_
         ).get_sql()
+
         self.cursor.execute(q)
         self.connection.commit()
 
-        # is used to check for any psql errors
-        self.cursor.fetchall()
+        # if number of affected fields = 0, => nothing was deleted
+        if self.cursor.rowcount == 0:
+            raise (repository_exceptions.
+                   UserNotFoundError("User was not found by specified id..."))
 
         return True
 
@@ -90,15 +105,84 @@ class UserRepository(Repository[User]):
         users = Table("Users")
 
         q = Query.update(users)
+        # iterating over user_data and finding fields to change
+        # the simply updating these fields with provided values
         for field in fields(User):
             field_val = getattr(user_data, field.name)
             if field_val is not None:
                 q = q.set(field.name, field_val)
-        q = q.get_sql()
+        q = q.where(users.id == id_).get_sql()
+
         self.cursor.execute(q)
         self.connection.commit()
 
-        # is used to check for any psql errors
-        self.cursor.fetchone()
+        # if number of affected fields = 0, => nothing has updated
+        if self.cursor.rowcount == 0:
+            raise (repository_exceptions.
+                   UserNotFoundError("User was not found by specified id..."))
 
         return True
+
+    def get_role(self, id_: int) -> int:
+        users = Table("Users")
+        roles = Table("Roles")
+
+        # single join:
+        # joining Users with Roles according to role id
+        q = Query.from_(users).left_join(
+            roles
+        ).on(users.role_id == roles.id).select(
+            roles.name
+        ).where(users.id == id_).get_sql()
+
+        self.cursor.execute(q)
+        self.connection.commit()
+
+        role = self.cursor.fetchone()[0]
+        if role is not None:
+            return role
+
+        raise (repository_exceptions.
+               RoleNotFound("Roles were not found for specified user..."))
+
+    def get_permissions(self, id_) -> list:
+        users = Table("Users")
+        role_permissions = Table("RolePermissions")
+        permissions = Table("Permissions")
+
+        # performing a double join:
+        # 1) joining Users with Permissions, according to their roles
+        # 2) joining User permissions with Permissions data
+        q = Query.from_(users).join(role_permissions).on(
+            users.role_id == role_permissions.role_id
+        ).join(permissions).on(
+            role_permissions.perm_id == permissions.id
+        ).select(
+            permissions.permission
+        ).where(
+            users.id == id_
+        ).get_sql()
+
+        self.cursor.execute(q)
+        self.connection.commit()
+
+        res = self.cursor.fetchall()
+        if res is not None:
+            return [record[0] for record in res]
+
+        raise (repository_exceptions.
+               PermissionsNotFoundError("Permissions were not found for specified user..."))
+
+
+def handle_psql_error(err):
+    # getting exception details
+    err_type, err_obj, traceback = sys.exc_info()
+
+    # get the line number when exception occurred
+    line_num = traceback.tb_lineno
+
+    print("\npsycopg2 ERROR:", err, "on line number:", line_num)
+    print("psycopg2 traceback:", traceback, "-- type:", err_type)
+    print("\nextensions.Diagnostics:", err.diag)
+    print("pgerror:", err.pgerror)
+    print("pgcode:", err.pgcode, "\n")

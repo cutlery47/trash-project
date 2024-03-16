@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from src.auth_service.controllers.user_controller import UserController
+from microservices.auth_service.controllers.user_controller import UserController
 
 
 class Router(Blueprint):
@@ -33,3 +33,11 @@ def register_routes(router: Router):
     @router.put("/users/update/<int:user_id>")
     def update_user(user_id):
         return router.controller.update(user_id)
+
+    @router.get("/users/role/<int:user_id>")
+    def get_user_role(user_id):
+        return router.controller.get_user_role(user_id)
+
+    @router.get("/users/permissions/<int:user_id>")
+    def get_user_permissions(user_id):
+        return router.controller.get_user_permissions(user_id)
