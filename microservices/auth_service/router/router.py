@@ -1,6 +1,6 @@
-from flask import Blueprint, request
+from flask import Blueprint
 
-from microservices.auth_service.controllers.user_controller import UserController
+from microservices.auth_service.controllers.auth_user_controller import UserController
 
 
 class Router(Blueprint):
@@ -10,11 +10,23 @@ class Router(Blueprint):
 
 
 def register_routes(router: Router):
-    @router.get("/users/get/<int:user_id>")
+    @router.post("/register/")
+    def register_user():
+        return router.controller.register()
+
+    @router.post("/register_admin/")
+    def register_admin():
+        return router.controller.register_admin()
+
+    @router.post("/login/")
+    def login():
+        return router.controller.login()
+
+    @router.get("/users/<int:user_id>")
     def get_user(user_id):
         return router.controller.get(user_id)
 
-    @router.get("/users/get/")
+    @router.get("/users/")
     def get_all_users():
         return router.controller.get_all()
 

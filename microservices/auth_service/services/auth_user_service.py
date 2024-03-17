@@ -1,9 +1,13 @@
 import random
 
 from microservices.auth_service.storage.entities.entities import User
-from microservices.auth_service.storage.repositories.user_repository import UserRepository
+from microservices.auth_service.storage.repositories.auth_user_repository import UserRepository
 
 from microservices.auth_service.exceptions import repository_exceptions
+from microservices.auth_service.exceptions import service_exceptions
+
+# TODO: implement password hashing
+# TODO: implement JWT
 
 
 class UserService:
@@ -20,6 +24,17 @@ class UserService:
         # "secure" parameter removes passwords from response body
         users = self.repo.get_all(secure)
         return users
+
+    def login(self, email, password):
+        user = self.get_by_email(email)
+        if user.password != password:
+            raise (service_exceptions.
+                   PasswordDoNotMatchError("Password doesnt match the stored one"))
+        return True
+
+    def get_by_email(self, email: str):
+        user = self.repo.get_by_email(email)
+        return user
 
     def create(self, user: User):
         user.id = self.randomize_id(1, 2 ** 31 - 1)

@@ -1,10 +1,12 @@
 import psycopg2
 from flask import make_response, Response, request, current_app
 
-from microservices.auth_service.services.user_service import UserService
+from microservices.auth_service.services.auth_user_service import UserService
 from microservices.auth_service.storage.entities.serializers import UserSerializer
 
-from microservices.auth_service.exceptions import repository_exceptions, controller_exceptions
+from microservices.auth_service.exceptions import repository_exceptions, controller_exceptions, service_exceptions
+
+# TODO: implement JWT verification
 
 
 class UserController:
@@ -12,6 +14,34 @@ class UserController:
     def __init__(self, service: UserService):
         self.service = service
         self.serializer = UserSerializer()
+
+    def register(self):
+        # wrapper over default user creation
+        return self._create()
+
+    def register_admin(self):
+        # wrapper over default admin creation
+        return self._create_admin()
+
+    def login(self):
+        try:
+            self._desired_input_check(['email', 'password'], request.json)
+
+        except (controller_exceptions.DesiredFieldsNotProvidedError,
+                controller_exceptions.ForbiddenFieldsProvidedError) as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        email = request.json.get('email')
+        password = request.json.get('password')
+
+        try:
+            result = self.service.login(email, password)
+
+        except (service_exceptions.PasswordDoNotMatchError,
+                repository_exceptions.UserNotFoundError) as err:
+            return self._make_response_from_exception(err, 400, "Password or email are invalid")
+
+        return make_response("Authorized")
 
     def get(self, id_: int) -> Response:
         # requires authorization
@@ -36,7 +66,7 @@ class UserController:
 
         return make_response([UserSerializer.serialize(response) for response in responses], 200)
 
-    def create(self) -> Response:
+    def _create(self) -> Response:
         try:
             self._forbidden_input_check(['id', 'role_id'], request.json)
             self._desired_input_check(['email', 'password'], request.json)
@@ -48,14 +78,17 @@ class UserController:
         user = UserSerializer.deserialize(request.json)
 
         try:
-            self.service.create(user)
+            user_id = self.service.create(user)
+
+        except repository_exceptions.UniqueConstraintError as err:
+            return self._make_response_from_exception(err, 400, str(err))
 
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response("200")
+        return make_response(str(user_id))
 
-    def create_admin(self) -> Response:
+    def _create_admin(self) -> Response:
         try:
             self._forbidden_input_check(['id', 'role_id'], request.json)
             self._desired_input_check(['email', 'password'], request.json)
@@ -67,12 +100,15 @@ class UserController:
         admin = UserSerializer.deserialize(request.json)
 
         try:
-            self.service.create_admin(admin)
+            user_id = self.service.create_admin(admin)
+
+        except repository_exceptions.UniqueConstraintError as err:
+            return self._make_response_from_exception(err, 400, str(err))
 
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response("200")
+        return make_response(str(user_id))
 
     def delete(self, id_) -> Response:
         # requires authorization

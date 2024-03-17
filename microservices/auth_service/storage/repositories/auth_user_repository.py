@@ -20,7 +20,7 @@ class UserRepository:
             self.connection = psycopg2.connect(database=config.dbname, user=config.user)
         except psycopg2.Error:
             raise (repository_exceptions.
-                   PostgresConnError("Couldn't establish database connection..."))
+                   PostgresConnError("Couldn't establish database connection"))
 
         self.cursor = self.connection.cursor()
 
@@ -50,7 +50,7 @@ class UserRepository:
             return User(*user_data)
 
         raise (repository_exceptions.
-               UserNotFoundError("User was not found by specified id..."))
+               UserNotFoundError("User was not found by specified id"))
 
     def get_all(self, secure: bool) -> list[User]:
         users = Table("Users")
@@ -70,6 +70,26 @@ class UserRepository:
         users_data = self.cursor.fetchall()
         return [User(*user_data) for user_data in users_data]
 
+    def get_by_email(self, email: str) -> User:
+        users = Table("Users")
+
+        user_fields = tuple(field.name for field in fields(User))
+
+        q = Query.from_(users).select(
+            *user_fields
+        ).where(
+            users.email == email
+        ).get_sql()
+        self.cursor.execute(q)
+        self.connection.commit()
+
+        user_data = self.cursor.fetchone()
+        if user_data:
+            return User(*user_data)
+
+        raise (repository_exceptions.
+               UserNotFoundError("User was not found by specified email"))
+
     def create(self, user_data: User) -> bool:
         users = Table("Users")
 
@@ -79,10 +99,15 @@ class UserRepository:
             user_data.email,
             user_data.password
         ).get_sql()
-        self.cursor.execute(q)
+        try:
+            self.cursor.execute(q)
+        except psycopg2.IntegrityError:
+            raise (repository_exceptions.
+                   UniqueConstraintError("User with that email already exists"))
+
         self.connection.commit()
 
-        return True
+        return user_data.id
 
     def delete(self, id_: int) -> bool:
         users = Table("Users")
@@ -97,7 +122,7 @@ class UserRepository:
         # if number of affected fields = 0, => nothing was deleted
         if self.cursor.rowcount == 0:
             raise (repository_exceptions.
-                   UserNotFoundError("User was not found by specified id..."))
+                   UserNotFoundError("User was not found by specified id"))
 
         return True
 
@@ -119,7 +144,7 @@ class UserRepository:
         # if number of affected fields = 0, => nothing has updated
         if self.cursor.rowcount == 0:
             raise (repository_exceptions.
-                   UserNotFoundError("User was not found by specified id..."))
+                   UserNotFoundError("User was not found by specified id"))
 
         return True
 
@@ -143,7 +168,7 @@ class UserRepository:
             return role
 
         raise (repository_exceptions.
-               RoleNotFound("Roles were not found for specified user..."))
+               RoleNotFound("Roles were not found for specified user"))
 
     def get_permissions(self, id_) -> list:
         users = Table("Users")
@@ -171,7 +196,7 @@ class UserRepository:
             return [record[0] for record in res]
 
         raise (repository_exceptions.
-               PermissionsNotFoundError("Permissions were not found for specified user..."))
+               PermissionsNotFoundError("Permissions were not found for specified user"))
 
 
 def handle_psql_error(err):
