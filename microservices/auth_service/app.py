@@ -1,9 +1,9 @@
 from flask import Flask
 import json
 
-from microservices.auth_service.storage.repositories.user_repository import UserRepository
-from microservices.auth_service.services.user_service import UserService
-from microservices.auth_service.controllers.user_controller import UserController
+from microservices.auth_service.storage.repositories.auth_user_repository import UserRepository
+from microservices.auth_service.services.auth_user_service import UserService
+from microservices.auth_service.controllers.auth_user_controller import UserController
 from microservices.auth_service.router.router import Router, register_routes
 
 
