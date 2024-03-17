@@ -16,3 +16,7 @@ class RoleNotFound(RepositoryError):
 
 class PermissionsNotFoundError(RepositoryError):
     pass
+
+
+class UniqueConstraintError(RepositoryError):
+    pass
