@@ -7,7 +7,7 @@ CREATE TABLE "Roles" (
 CREATE TABLE "Users" (
     id          INT NOT NULL,
     role_id     INT NOT NULL,
-    email       VARCHAR(128) NOT NULL,
+    email       VARCHAR(128) NOT NULL UNIQUE,
     password    VARCHAR(128) NOT NULL,
     PRIMARY KEY(id),
     FOREIGN KEY(role_id) REFERENCES "Roles"(id)
