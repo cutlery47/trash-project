@@ -2,5 +2,5 @@ class ServiceException(Exception):
     pass
 
 
-class PasswordDoNotMatchError(ServiceException):
+class PasswordDoesNotMatchError(ServiceException):
     pass

@@ -10,7 +10,7 @@ class UserNotFoundError(RepositoryError):
     pass
 
 
-class RoleNotFound(RepositoryError):
+class RoleNotFoundError(RepositoryError):
     pass
 
 
