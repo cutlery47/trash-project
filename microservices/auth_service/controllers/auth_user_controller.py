@@ -7,6 +7,7 @@ from microservices.auth_service.storage.entities.serializers import UserSerializ
 from microservices.auth_service.exceptions import repository_exceptions, controller_exceptions, service_exceptions
 
 # TODO: implement JWT verification
+# TODO: implement refresh token system
 
 
 class UserController:
@@ -17,11 +18,11 @@ class UserController:
 
     def register(self):
         # wrapper over default user creation
-        return self._create()
+        return self.register()
 
     def register_admin(self):
         # wrapper over default admin creation
-        return self._create_admin()
+        return self.register_admin()
 
     def login(self):
         try:
@@ -31,17 +32,17 @@ class UserController:
                 controller_exceptions.ForbiddenFieldsProvidedError) as err:
             return self._make_response_from_exception(err, 400, str(err))
 
-        email = request.json.get('email')
-        password = request.json.get('password')
+        email = request.json['email']
+        password = request.json['password']
 
         try:
             result = self.service.login(email, password)
 
-        except (service_exceptions.PasswordDoNotMatchError,
+        except (service_exceptions.PasswordDoesNotMatchError,
                 repository_exceptions.UserNotFoundError) as err:
             return self._make_response_from_exception(err, 400, "Password or email are invalid")
 
-        return make_response("Authorized")
+        return make_response(result)
 
     def get(self, id_: int) -> Response:
         # requires authorization
@@ -66,7 +67,7 @@ class UserController:
 
         return make_response([UserSerializer.serialize(response) for response in responses], 200)
 
-    def _create(self) -> Response:
+    def create(self) -> Response:
         try:
             self._forbidden_input_check(['id', 'role_id'], request.json)
             self._desired_input_check(['email', 'password'], request.json)
@@ -88,7 +89,7 @@ class UserController:
 
         return make_response(str(user_id))
 
-    def _create_admin(self) -> Response:
+    def create_admin(self) -> Response:
         try:
             self._forbidden_input_check(['id', 'role_id'], request.json)
             self._desired_input_check(['email', 'password'], request.json)
@@ -148,7 +149,7 @@ class UserController:
         try:
             role = self.service.get_user_role(id_)
 
-        except repository_exceptions.RoleNotFound as err:
+        except repository_exceptions.RoleNotFoundError as err:
             return self._make_response_from_exception(err, 400, str(err))
 
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
