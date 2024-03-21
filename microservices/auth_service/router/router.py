@@ -18,9 +18,13 @@ def register_routes(router: Router):
     def register_admin():
         return router.controller.register_admin()
 
-    @router.post("/login/")
-    def login():
-        return router.controller.login()
+    @router.post("/authorize/")
+    def authorize():
+        return router.controller.authorize()
+
+    @router.post("/refresh/")
+    def refresh():
+        return router.controller.refresh()
 
     @router.get("/users/<int:user_id>")
     def get_user(user_id):

@@ -168,9 +168,9 @@ class UserRepository:
             return role
 
         raise (repository_exceptions.
-               RoleNotFound("Roles were not found for specified user"))
+               RoleNotFoundError("Roles were not found for specified user"))
 
-    def get_permissions(self, id_) -> list:
+    def get_permissions(self, id_) -> list[str]:
         users = Table("Users")
         role_permissions = Table("RolePermissions")
         permissions = Table("Permissions")
@@ -197,17 +197,3 @@ class UserRepository:
 
         raise (repository_exceptions.
                PermissionsNotFoundError("Permissions were not found for specified user"))
-
-
-def handle_psql_error(err):
-    # getting exception details
-    err_type, err_obj, traceback = sys.exc_info()
-
-    # get the line number when exception occurred
-    line_num = traceback.tb_lineno
-
-    print("\npsycopg2 ERROR:", err, "on line number:", line_num)
-    print("psycopg2 traceback:", traceback, "-- type:", err_type)
-    print("\nextensions.Diagnostics:", err.diag)
-    print("pgerror:", err.pgerror)
-    print("pgcode:", err.pgcode, "\n")
