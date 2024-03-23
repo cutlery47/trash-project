@@ -1,6 +1,8 @@
 from datetime import timezone, datetime, timedelta
 import jwt
 
+from microservices.auth_service.exceptions import token_exceptions
+
 
 class TokenHandler:
     def __init__(self):
@@ -19,8 +21,17 @@ class TokenHandler:
         refresh_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=self.secret)
         return refresh_token
 
+    def verify_access(self, token):
+        try:
+            jwt.decode(token, algorithms=self.algorithm, key=self.secret)
+
+        except jwt.DecodeError as err:
+            raise token_exceptions.TokenIsInvalid(str(err))
+
     def decode(self, token) -> dict:
-        return jwt.decode(token, algorithms=self.algorithm, key=self.secret)
+        # simply decodes all the data without any verification
+        return jwt.decode(token, algorithms=self.algorithm, key=self.secret, options={"verify_signature": False})
+
 
     @staticmethod
     def _generate_access_payload(id_, email, role, permissions) -> dict:

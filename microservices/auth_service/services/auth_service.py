@@ -1,7 +1,7 @@
 import random
 
 from microservices.auth_service.storage.entities.entities import User
-from microservices.auth_service.storage.repositories.auth_user_repository import UserRepository
+from microservices.auth_service.storage.repositories.auth_repository import UserRepository
 from microservices.auth_service.services.token_handler import TokenHandler
 
 from microservices.auth_service.exceptions import repository_exceptions

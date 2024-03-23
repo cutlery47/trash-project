@@ -1,13 +1,13 @@
 import psycopg2
 from flask import make_response, Response, request, current_app
+from functools import wraps
 
-from microservices.auth_service.services.auth_user_service import UserService
+from microservices.auth_service.services.auth_service import UserService
 from microservices.auth_service.storage.entities.serializers import UserSerializer
+from microservices.auth_service.services.token_handler import TokenHandler
 
-from microservices.auth_service.exceptions import repository_exceptions, controller_exceptions, service_exceptions
-
-# TODO: implement JWT verification
-# TODO: stash all the data checks into decorators
+from microservices.auth_service.exceptions import (repository_exceptions, controller_exceptions,
+                                                   service_exceptions, token_exceptions)
 
 
 class UserController:
@@ -24,7 +24,7 @@ class UserController:
     def register_admin(self) -> Response:
         return self.register_admin()
 
-    def authorize(self) -> Response:
+    def authenticate(self) -> Response:
         try:
             self._desired_input_check(['email', 'password'], request.json)
 
@@ -36,12 +36,10 @@ class UserController:
         password = request.json['password']
 
         try:
-            result = self.service.authorize(email, password)
+            result = self.service.authenticate(email, password)
 
-        except (service_exceptions.PasswordDoesNotMatchError,
-                repository_exceptions.UserNotFoundError) as err:
+        except (service_exceptions.PasswordDoesNotMatchError, repository_exceptions.UserNotFoundError) as err:
             return self._make_response_from_exception(err, 400, "Password or email are invalid")
-
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
@@ -65,20 +63,29 @@ class UserController:
         return make_response(refresh_token, 200)
 
     def get(self, id_: int) -> Response:
-        # requires authorization
+        access_verification_response = self.verify_access()
+
+        # verification failed
+        if access_verification_response is not True:
+            return access_verification_response
+
         try:
             response = self.service.get(id_, True)
 
         except repository_exceptions.UserNotFoundError as err:
             return self._make_response_from_exception(err, 400, str(err))
-
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response(self.serializer.serialize(response), 200)
 
     def get_all(self) -> Response:
-        # requires authorization
+        access_verification_response = self.verify_access()
+
+        # verification failed
+        if access_verification_response is not True:
+            return access_verification_response
+
         try:
             responses = self.service.get_all(True)
 
@@ -103,7 +110,6 @@ class UserController:
 
         except repository_exceptions.UniqueConstraintError as err:
             return self._make_response_from_exception(err, 400, str(err))
-
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
@@ -125,31 +131,40 @@ class UserController:
 
         except repository_exceptions.UniqueConstraintError as err:
             return self._make_response_from_exception(err, 400, str(err))
-
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response(str(user_id), 200)
 
     def delete(self, id_: int) -> Response:
-        # requires authorization
+        access_verification_response = self.verify_access()
+
+        # verification failed
+        if access_verification_response is not True:
+            return access_verification_response
+
         try:
             self.service.delete(id_)
 
         except repository_exceptions.UserNotFoundError as err:
             return self._make_response_from_exception(err, 400, str(err))
-
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response("200", 200)
 
     def update(self, id_: int) -> Response:
-        # requires authorization
+        access_verification_response = self.verify_access()
+
+        # verification failed
+        if access_verification_response is not True:
+            return access_verification_response
+
         try:
             self._forbidden_input_check(['id', 'role_id'], request.json)
 
-        except controller_exceptions.ForbiddenFieldsProvidedError as err:
+        except (controller_exceptions.ForbiddenFieldsProvidedError,
+                controller_exceptions.DesiredFieldsNotProvidedError) as err:
             return self._make_response_from_exception(err, 400, str(err))
 
         user = UserSerializer.deserialize(request.json)
@@ -159,35 +174,61 @@ class UserController:
 
         except repository_exceptions.UserNotFoundError as err:
             return self._make_response_from_exception(err, 400, str(err))
-
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response("200", 200)
 
     def get_user_role(self, id_: int) -> Response:
+        access_verification_response = self.verify_access()
+
+        # verification failed
+        if access_verification_response is not True:
+            return access_verification_response
+
         try:
             role = self.service.get_user_role(id_)
 
         except repository_exceptions.RoleNotFoundError as err:
             return self._make_response_from_exception(err, 400, str(err))
-
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response(role, 200)
 
     def get_user_permissions(self, id_: int) -> Response:
+        access_verification_response = self.verify_access()
+
+        # verification failed
+        if access_verification_response is not True:
+            return access_verification_response
+
         try:
-            role = self.service.get_user_permissions(id_)
+            permissions = self.service.get_user_permissions(id_)
 
         except repository_exceptions.PermissionsNotFoundError as err:
             return self._make_response_from_exception(err, 400, str(err))
-
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response(role, 200)
+        return make_response(permissions, 200)
+
+    def verify_access(self):
+        try:
+            self._desired_input_check(["access"], request.json)
+
+        except controller_exceptions.DesiredFieldsNotProvidedError as err:
+            return self._make_response_from_exception(err, 400, str(err))
+
+        token_handler = TokenHandler()
+
+        try:
+            token_handler.verify_access(request.json["access"])
+
+        except token_exceptions.TokenIsInvalid as err:
+            return self._make_response_from_exception(err, 403, "Access token is invalid")
+
+        return True
 
     @staticmethod
     def _make_response_from_exception(err: Exception, status: int, response: str) -> Response:

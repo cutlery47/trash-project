@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from microservices.auth_service.controllers.auth_user_controller import UserController
+from microservices.auth_service.controllers.auth_controller import UserController
 
 
 class Router(Blueprint):
