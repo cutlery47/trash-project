@@ -1,6 +1,5 @@
 import psycopg2
 from flask import make_response, Response, request, current_app
-from functools import wraps
 
 from microservices.auth_service.services.auth_service import UserService
 from microservices.auth_service.storage.entities.serializers import UserSerializer
@@ -24,7 +23,7 @@ class UserController:
     def register_admin(self) -> Response:
         return self.register_admin()
 
-    def authenticate(self) -> Response:
+    def authorize(self) -> Response:
         try:
             self._desired_input_check(['email', 'password'], request.json)
 
@@ -36,7 +35,7 @@ class UserController:
         password = request.json['password']
 
         try:
-            result = self.service.authenticate(email, password)
+            result = self.service.authorize(email, password)
 
         except (service_exceptions.PasswordDoesNotMatchError, repository_exceptions.UserNotFoundError) as err:
             return self._make_response_from_exception(err, 400, "Password or email are invalid")

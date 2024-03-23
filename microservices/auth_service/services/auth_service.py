@@ -1,3 +1,4 @@
+import hashlib
 import random
 
 from microservices.auth_service.storage.entities.entities import User
@@ -16,7 +17,7 @@ class UserService:
     def __init__(self, repo: UserRepository):
         self.repo = repo
 
-    def authorize(self, email: str, password: str) -> list[str]:
+    def authorize(self, email: str, password: str) -> dict:
         user = self.authenticate(email, password)
         role = self.get_user_role(user.id)
         permissions = self.get_user_permissions(user.id)
@@ -25,7 +26,15 @@ class UserService:
         access_token = token_handler.generate_access(user.id, user.email, role, permissions)
         refresh_token = token_handler.generate_refresh(user.id)
 
-        return [access_token, refresh_token]
+        return {"access": access_token,
+                "refresh": refresh_token}
+
+    def authenticate(self, email, password) -> User:
+        user = self.get_by_email(email)
+        if user.password != self.hash_password(password):
+            raise (service_exceptions.
+                   PasswordDoesNotMatchError("Password doesnt match the stored one"))
+        return user
 
     @staticmethod
     def refresh(id_: int) -> str:
@@ -51,11 +60,13 @@ class UserService:
     def create(self, user: User) -> bool:
         user.id = self.randomize_id(1, 2 ** 31 - 1)
         user.role_id = 0
+        user.password = self.hash_password(user.password)
         return self.repo.create(user)
 
     def create_admin(self, admin: User) -> bool:
         admin.id = self.randomize_id(1, 2 ** 31 - 1)
         admin.role_id = 1
+        admin.password = self.hash_password(admin.password)
         return self.repo.create(admin)
 
     def delete(self, id_: int) -> bool:
@@ -70,12 +81,10 @@ class UserService:
     def get_user_permissions(self, id_) -> list[str]:
         return self.repo.get_permissions(id_)
 
-    def authenticate(self, email, password) -> User:
-        user = self.get_by_email(email)
-        if user.password != password:
-            raise (service_exceptions.
-                   PasswordDoesNotMatchError("Password doesnt match the stored one"))
-        return user
+    def hash_password(self, plain_passwd):
+        hasher = hashlib.sha256()
+        hasher.update(plain_passwd.encode())
+        return hasher.hexdigest()
 
     def randomize_id(self, lower_bound: int, upper_bound: int) -> int:
         while True:
