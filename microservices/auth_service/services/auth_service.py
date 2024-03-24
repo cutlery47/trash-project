@@ -5,11 +5,7 @@ from microservices.auth_service.storage.entities.entities import User
 from microservices.auth_service.storage.repositories.auth_repository import UserRepository
 from microservices.auth_service.services.token_handler import TokenHandler
 
-from microservices.auth_service.exceptions import repository_exceptions
-from microservices.auth_service.exceptions import service_exceptions
-
-# TODO: implement password hashing
-# TODO: implement JWT
+from microservices.auth_service.exceptions import (repository_exceptions, token_exceptions, service_exceptions)
 
 
 class UserService:
@@ -36,12 +32,17 @@ class UserService:
                    PasswordDoesNotMatchError("Password doesnt match the stored one"))
         return user
 
-    @staticmethod
-    def refresh(id_: int) -> str:
-        token_handler = TokenHandler()
-        refresh_token = token_handler.generate_refresh(id_)
+    def refresh(self, refresh_token: dict) -> dict:
+        id_ = refresh_token["id"]
+        user = self.get(id_)
 
-        return refresh_token
+        role = self.get_user_role(id_)
+        permissions = self.get_user_permissions(id_)
+
+        token_handler = TokenHandler()
+        new_access_token = token_handler.generate_access(user.id, user.email, role, permissions)
+
+        return {"access": new_access_token}
 
     def get(self, id_: int, secure: bool = True) -> User:
         # "secure" parameter removes password from response body

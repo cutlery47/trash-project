@@ -1,12 +1,12 @@
 import psycopg2
-from flask import make_response, Response, request, current_app
+from flask import make_response, Response, request
 
 from microservices.auth_service.services.auth_service import UserService
 from microservices.auth_service.storage.entities.serializers import UserSerializer
-from microservices.auth_service.services.token_handler import TokenHandler
 
-from microservices.auth_service.exceptions import (repository_exceptions, controller_exceptions,
-                                                   service_exceptions, token_exceptions)
+from microservices.auth_service.exceptions import repository_exceptions, controller_exceptions, service_exceptions
+from microservices.auth_service.controllers.data_validators import (InputValidator, TokenValidator,
+                                                                    PermissionValidator, make_response_from_exception)
 
 
 class UserController:
@@ -14,22 +14,23 @@ class UserController:
     def __init__(self, service: UserService):
         self.service = service
         self.serializer = UserSerializer()
+        self.input_validator = InputValidator()
+        self.token_validator = TokenValidator()
+        self.permission_validator = PermissionValidator()
 
     # wrapper over default user creation
     def register(self) -> Response:
-        return self.register()
+        return self.create()
 
     # wrapper over default admin creation
     def register_admin(self) -> Response:
-        return self.register_admin()
+        return self.create_admin()
 
     def authorize(self) -> Response:
-        try:
-            self._desired_input_check(['email', 'password'], request.json)
-
-        except (controller_exceptions.DesiredFieldsNotProvidedError,
-                controller_exceptions.ForbiddenFieldsProvidedError) as err:
-            return self._make_response_from_exception(err, 400, str(err))
+        input_validator_response = self.input_validator.validate_desired(desired_keys=['email', 'password'],
+                                                                         json=request.json)
+        if input_validator_response is not True:
+            return input_validator_response
 
         email = request.json['email']
         password = request.json['password']
@@ -38,222 +39,175 @@ class UserController:
             result = self.service.authorize(email, password)
 
         except (service_exceptions.PasswordDoesNotMatchError, repository_exceptions.UserNotFoundError) as err:
-            return self._make_response_from_exception(err, 400, "Password or email are invalid")
+            return make_response_from_exception(err, 400, "Password or email are invalid")
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response(result, 200)
 
     def refresh(self) -> Response:
-        try:
-            self._desired_input_check(["id"], request.json)
+        # generates an access token by using the information provided in refresh token
+        # (only if refresh token itself is valid)
+        input_validator_response = self.input_validator.validate_desired(desired_keys=['refresh'],
+                                                                         json=request.json)
+        if input_validator_response is not True:
+            return input_validator_response
 
-        except controller_exceptions.DesiredFieldsNotProvidedError as err:
-            return self._make_response_from_exception(err, 400, str(err))
+        token_validator_response = self.token_validator.validate_refresh(request.json)
 
-        id_ = request.json.get("id")
+        if token_validator_response is not True:
+            return token_validator_response
 
-        try:
-            refresh_token = self.service.refresh(id_)
+        refresh_token = request.json['refresh']
+        new_access_token = self.service.refresh(refresh_token)
 
-        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
-
-        return make_response(refresh_token, 200)
+        return make_response(new_access_token, 200)
 
     def get(self, id_: int) -> Response:
-        access_verification_response = self.verify_access()
+        access_validation_response = self.token_validator.validate_access(json=request.json)
 
-        # verification failed
-        if access_verification_response is not True:
-            return access_verification_response
+        if access_validation_response is not True:
+            return access_validation_response
+
+        permissions_validation_response = self.permission_validator.validate(permissions=['GET USER DATA'],
+                                                                             json=request.json)
+        if permissions_validation_response is not True:
+            return permissions_validation_response
 
         try:
             response = self.service.get(id_, True)
 
         except repository_exceptions.UserNotFoundError as err:
-            return self._make_response_from_exception(err, 400, str(err))
+            return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response(self.serializer.serialize(response), 200)
 
     def get_all(self) -> Response:
-        access_verification_response = self.verify_access()
+        access_validation_response = self.token_validator.validate_access(request.json)
 
-        # verification failed
-        if access_verification_response is not True:
-            return access_verification_response
+        if access_validation_response is not True:
+            return access_validation_response
+
+        permissions_validation_response = self.permission_validator.validate(permissions=["GET MULTIPLE USERS DATA"],
+                                                                             json=request.json)
+        if permissions_validation_response is not True:
+            return permissions_validation_response
 
         try:
             responses = self.service.get_all(True)
 
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response([UserSerializer.serialize(response) for response in responses], 200)
 
     def create(self) -> Response:
-        try:
-            self._forbidden_input_check(['id', 'role_id'], request.json)
-            self._desired_input_check(['email', 'password'], request.json)
+        input_validator_response = self.input_validator.validate_desired(desired_keys=['email', 'password'],
+                                                                         json=request.json)
+        if input_validator_response is not True:
+            return input_validator_response
 
-        except (controller_exceptions.DesiredFieldsNotProvidedError,
-                controller_exceptions.ForbiddenFieldsProvidedError) as err:
-            return self._make_response_from_exception(err, 400, str(err))
-
-        user = UserSerializer.deserialize(request.json)
+        user = UserSerializer.deserialize({"email": request.json["email"],
+                                           "password": request.json["password"]})
 
         try:
-            user_id = self.service.create(user)
+            self.service.create(user)
 
         except repository_exceptions.UniqueConstraintError as err:
-            return self._make_response_from_exception(err, 400, str(err))
+            return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response(str(user_id), 200)
+        return make_response("200", 200)
 
     def create_admin(self) -> Response:
-        try:
-            self._forbidden_input_check(['id', 'role_id'], request.json)
-            self._desired_input_check(['email', 'password'], request.json)
+        input_validator_response = self.input_validator.validate_desired(desired_keys=['email', 'password'],
+                                                                         json=request.json)
+        if input_validator_response is not True:
+            return input_validator_response
 
-        except (controller_exceptions.DesiredFieldsNotProvidedError,
-                controller_exceptions.ForbiddenFieldsProvidedError) as err:
-            return self._make_response_from_exception(err, 400, str(err))
-
-        admin = UserSerializer.deserialize(request.json)
+        admin = UserSerializer.deserialize({"email": request.json["email"],
+                                           "password": request.json["password"]})
 
         try:
-            user_id = self.service.create_admin(admin)
+            self.service.create_admin(admin)
 
         except repository_exceptions.UniqueConstraintError as err:
-            return self._make_response_from_exception(err, 400, str(err))
+            return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response(str(user_id), 200)
+        return make_response("200", 200)
 
     def delete(self, id_: int) -> Response:
-        access_verification_response = self.verify_access()
+        access_validation_response = self.token_validator.validate_access(request.json)
 
         # verification failed
-        if access_verification_response is not True:
-            return access_verification_response
+        if access_validation_response is not True:
+            return access_validation_response
 
         try:
             self.service.delete(id_)
 
         except repository_exceptions.UserNotFoundError as err:
-            return self._make_response_from_exception(err, 400, str(err))
+            return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response("200", 200)
 
     def update(self, id_: int) -> Response:
-        access_verification_response = self.verify_access()
+        access_validation_response = self.token_validator.validate_access(request.json)
 
         # verification failed
-        if access_verification_response is not True:
-            return access_verification_response
+        if access_validation_response is not True:
+            return access_validation_response
 
-        try:
-            self._forbidden_input_check(['id', 'role_id'], request.json)
-
-        except (controller_exceptions.ForbiddenFieldsProvidedError,
-                controller_exceptions.DesiredFieldsNotProvidedError) as err:
-            return self._make_response_from_exception(err, 400, str(err))
-
-        user = UserSerializer.deserialize(request.json)
+        user = UserSerializer.deserialize({"email": request.json["email"],
+                                           "password": request.json["password"]})
 
         try:
             self.service.update(id_, user)
 
         except repository_exceptions.UserNotFoundError as err:
-            return self._make_response_from_exception(err, 400, str(err))
+            return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response("200", 200)
 
     def get_user_role(self, id_: int) -> Response:
-        access_verification_response = self.verify_access()
+        access_validation_response = self.token_validator.validate_access(request.json)
 
         # verification failed
-        if access_verification_response is not True:
-            return access_verification_response
+        if access_validation_response is not True:
+            return access_validation_response
 
         try:
             role = self.service.get_user_role(id_)
 
         except repository_exceptions.RoleNotFoundError as err:
-            return self._make_response_from_exception(err, 400, str(err))
+            return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response(role, 200)
 
     def get_user_permissions(self, id_: int) -> Response:
-        access_verification_response = self.verify_access()
+        access_validation_response = self.token_validator.validate_access(request.json)
 
         # verification failed
-        if access_verification_response is not True:
-            return access_verification_response
+        if access_validation_response is not True:
+            return access_validation_response
 
         try:
             permissions = self.service.get_user_permissions(id_)
 
         except repository_exceptions.PermissionsNotFoundError as err:
-            return self._make_response_from_exception(err, 400, str(err))
+            return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return self._make_response_from_exception(err, 500, "Unexpected error happened on the server")
+            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
         return make_response(permissions, 200)
-
-    def verify_access(self):
-        try:
-            self._desired_input_check(["access"], request.json)
-
-        except controller_exceptions.DesiredFieldsNotProvidedError as err:
-            return self._make_response_from_exception(err, 400, str(err))
-
-        token_handler = TokenHandler()
-
-        try:
-            token_handler.verify_access(request.json["access"])
-
-        except token_exceptions.TokenIsInvalid as err:
-            return self._make_response_from_exception(err, 403, "Access token is invalid")
-
-        return True
-
-    @staticmethod
-    def _make_response_from_exception(err: Exception, status: int, response: str) -> Response:
-        current_app.logger.error(f"{type(err).__name__}: {str(err)}")
-        return make_response(response, status)
-
-    @staticmethod
-    def _desired_input_check(desired_keys: list, request_json: dict) -> bool:
-        # if called - checks that each "desired key" is passed in the request
-
-        for key in desired_keys:
-            if not request_json.get(key):
-                raise controller_exceptions.DesiredFieldsNotProvidedError(f"Desired key: \"{key}\" is not provided")
-
-        return True
-
-    @staticmethod
-    def _forbidden_input_check(forbidden_keys: list, request_json: dict) -> bool:
-        # if called - checks that no "forbidden key" is passed in the request
-
-        for key in forbidden_keys:
-            if request_json.get(key):
-                raise controller_exceptions.ForbiddenFieldsProvidedError(f"Forbidden key: \"{key}\" is provided")
-
-        return True
-
-    @staticmethod
-    def _get_url_subdomain_by_index(index: int) -> str:
-        return request.url_rule.rule.split('/')[index]

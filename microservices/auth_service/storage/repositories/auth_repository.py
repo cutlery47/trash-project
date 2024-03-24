@@ -104,8 +104,8 @@ class UserRepository:
         except psycopg2.IntegrityError:
             raise (repository_exceptions.
                    UniqueConstraintError("User with that email already exists"))
-
-        self.connection.commit()
+        finally:
+            self.connection.commit()
 
         return user_data.id
 

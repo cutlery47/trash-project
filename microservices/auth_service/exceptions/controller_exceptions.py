@@ -8,3 +8,7 @@ class DesiredFieldsNotProvidedError(ControllerError):
 
 class ForbiddenFieldsProvidedError(ControllerError):
     pass
+
+
+class PermissionsNotGrantedError(ControllerError):
+    pass

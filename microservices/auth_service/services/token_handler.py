@@ -9,8 +9,8 @@ class TokenHandler:
         self.secret = open("microservices/auth_service/config/app/jwt_secret.txt").read()
         self.algorithm = "HS256"
 
-    def generate_access(self, id_, email, roles, permissions) -> str:
-        payload = self._generate_access_payload(id_, email, roles, permissions)
+    def generate_access(self, id_, email, role, permissions) -> str:
+        payload = self._generate_access_payload(id_, email, role, permissions)
 
         access_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=self.secret)
         return access_token
@@ -21,12 +21,14 @@ class TokenHandler:
         refresh_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=self.secret)
         return refresh_token
 
-    def verify_access(self, token):
+    def verify(self, token):
         try:
-            jwt.decode(token, algorithms=self.algorithm, key=self.secret)
+            decoded = jwt.decode(token, algorithms=self.algorithm, key=self.secret)
 
         except jwt.DecodeError as err:
             raise token_exceptions.TokenIsInvalid(str(err))
+
+        return decoded
 
     def decode(self, token) -> dict:
         # simply decodes all the data without any verification
