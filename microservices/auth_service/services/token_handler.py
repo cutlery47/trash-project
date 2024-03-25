@@ -25,7 +25,7 @@ class TokenHandler:
         try:
             decoded = jwt.decode(token, algorithms=self.algorithm, key=self.secret)
 
-        except jwt.DecodeError as err:
+        except jwt.PyJWTError as err:
             raise token_exceptions.TokenIsInvalid(str(err))
 
         return decoded

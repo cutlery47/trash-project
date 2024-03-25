@@ -2,15 +2,15 @@ import hashlib
 import random
 
 from microservices.auth_service.storage.entities.entities import User
-from microservices.auth_service.storage.repositories.auth_repository import UserRepository
+from microservices.auth_service.storage.repositories.auth_repository import Repository
 from microservices.auth_service.services.token_handler import TokenHandler
 
-from microservices.auth_service.exceptions import (repository_exceptions, token_exceptions, service_exceptions)
+from microservices.auth_service.exceptions import (repository_exceptions, service_exceptions)
 
 
-class UserService:
+class Service:
 
-    def __init__(self, repo: UserRepository):
+    def __init__(self, repo: Repository):
         self.repo = repo
 
     def authorize(self, email: str, password: str) -> dict:
@@ -32,8 +32,10 @@ class UserService:
                    PasswordDoesNotMatchError("Password doesnt match the stored one"))
         return user
 
-    def refresh(self, refresh_token: dict) -> dict:
-        id_ = refresh_token["id"]
+    def refresh(self, refresh_token: str) -> dict:
+        token_handler = TokenHandler()
+
+        id_ = token_handler.decode(refresh_token)["id"]
         user = self.get(id_)
 
         role = self.get_user_role(id_)

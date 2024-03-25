@@ -1,7 +1,6 @@
 from pypika import Query, Table
 from dataclasses import fields
 import psycopg2
-import sys
 
 from microservices.auth_service.storage.entities.entities import User
 from microservices.auth_service.config.database.db_config import DBConfig
@@ -10,7 +9,7 @@ from microservices.auth_service.exceptions import repository_exceptions
 
 
 # noinspection PyTypeChecker
-class UserRepository:
+class Repository:
 
     def __init__(self, db_config):
         # connecting to db

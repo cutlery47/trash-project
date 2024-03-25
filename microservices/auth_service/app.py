@@ -1,9 +1,9 @@
 from flask import Flask
 import json
 
-from microservices.auth_service.storage.repositories.auth_repository import UserRepository
-from microservices.auth_service.services.auth_service import UserService
-from microservices.auth_service.controllers.auth_controller import UserController
+from microservices.auth_service.storage.repositories.auth_repository import Repository
+from microservices.auth_service.services.auth_service import Service
+from microservices.auth_service.controllers.auth_controller import Controller
 from microservices.auth_service.router.router import Router, register_routes
 
 
@@ -19,9 +19,9 @@ class TrashAssApplication:
         app = Flask(__name__)
         app.config.from_file(app_config, load=json.load)
 
-        repo = UserRepository(db_config)
-        service = UserService(repo=repo)
-        controller = UserController(service=service)
+        repo = Repository(db_config)
+        service = Service(repo=repo)
+        controller = Controller(service=service)
         router = Router("router", __name__, url_prefix="/api/v1/auth", controller=controller)
 
         # routing
