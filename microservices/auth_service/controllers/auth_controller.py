@@ -54,7 +54,7 @@ class Controller:
         return make_response(new_access_token, 200)
 
     @authentication_required
-    @permissions_required(permissions=['GET SINGLE USER DATA'])
+    @permissions_required(['GET SINGLE USER DATA'])
     def get(self, id_: int) -> Response:
         try:
             response = self.service.get(id_, True)
@@ -67,7 +67,7 @@ class Controller:
         return make_response(self.serializer.serialize(response), 200)
 
     @authentication_required
-    @permissions_required(permissions=['GET MULTIPLE USERS DATA'])
+    @permissions_required(['GET MULTIPLE USERS DATA'])
     def get_all(self) -> Response:
         try:
             responses = self.service.get_all(True)

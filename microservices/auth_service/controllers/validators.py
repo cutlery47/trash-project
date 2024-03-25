@@ -5,7 +5,7 @@ from flask import current_app, make_response, Response, request
 from microservices.auth_service.exceptions import controller_exceptions, token_exceptions
 from microservices.auth_service.services.token_handler import TokenHandler
 
-# TODO: clean up this mes
+# TODO: clean up this mess
 
 
 # authentication decorator
