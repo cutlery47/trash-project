@@ -1,11 +1,11 @@
 import hashlib
 import random
 
-from microservices.auth_service.storage.entities.entities import User
-from microservices.auth_service.storage.repositories.auth_repository import Repository
-from microservices.auth_service.services.token_handler import TokenHandler
+from src.storage.entities.entities import User
+from src.storage.repositories.auth_repository import Repository
+from src.services.token_handler import TokenHandler
 
-from microservices.auth_service.exceptions import (repository_exceptions, service_exceptions)
+from src.exceptions import service_exceptions, repository_exceptions
 
 
 class Service:

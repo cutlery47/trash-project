@@ -1,12 +1,12 @@
 from datetime import timezone, datetime, timedelta
 import jwt
 
-from microservices.auth_service.exceptions import token_exceptions
+from src.exceptions import token_exceptions
 
 
 class TokenHandler:
     def __init__(self):
-        self.secret = open("microservices/auth_service/config/app/jwt_secret.txt").read()
+        self.secret = open("src/config/app/jwt_secret.txt").read()
         self.algorithm = "HS256"
 
     def generate_access(self, id_, email, role, permissions) -> str:

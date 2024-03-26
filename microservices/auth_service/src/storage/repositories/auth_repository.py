@@ -2,10 +2,10 @@ from pypika import Query, Table
 from dataclasses import fields
 import psycopg2
 
-from microservices.auth_service.storage.entities.entities import User
-from microservices.auth_service.config.database.db_config import DBConfig
+from src.storage.entities.entities import User
+from src.config.database.db_config import DBConfig
 
-from microservices.auth_service.exceptions import repository_exceptions
+from src.exceptions import repository_exceptions
 
 
 # noinspection PyTypeChecker
@@ -22,10 +22,6 @@ class Repository:
                    PostgresConnError("Couldn't establish database connection"))
 
         self.cursor = self.connection.cursor()
-
-    def __del__(self):
-        self.cursor.close()
-        self.connection.close()
 
     def get(self, id_: int, secure: bool) -> User:
         users = Table("Users")

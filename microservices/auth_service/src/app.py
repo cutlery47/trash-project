@@ -1,10 +1,10 @@
 from flask import Flask
 import json
 
-from microservices.auth_service.storage.repositories.auth_repository import Repository
-from microservices.auth_service.services.auth_service import Service
-from microservices.auth_service.controllers.auth_controller import Controller
-from microservices.auth_service.router.router import Router, register_routes
+from src.storage.repositories.auth_repository import Repository
+from src.services.auth_service import Service
+from src.controllers.auth_controller import Controller
+from src.router.router import Router, register_routes
 
 
 class TrashAssApplication:
@@ -12,7 +12,7 @@ class TrashAssApplication:
     @classmethod
     def create(cls,
                app_config="config/app/app_config.json",
-               db_config="microservices/auth_service/config/database/db_config.json"
+               db_config="src/config/database/db_config.json"
                ) -> Flask:
 
         # configuring application

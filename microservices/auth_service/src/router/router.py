@@ -1,7 +1,6 @@
 from flask import Blueprint
 
-from microservices.auth_service.controllers.auth_controller import Controller
-from microservices.auth_service.controllers.validators import authentication_required
+from src.controllers.auth_controller import Controller
 
 
 class Router(Blueprint):
@@ -37,12 +36,12 @@ def register_routes(router: Router):
         return router.controller.refresh()
 
     @router.get("/users/<int:user_id>")
-    # returns user auth-info specified by id
+    # returns user src-info specified by id
     def get_user(user_id):
         return router.controller.get(user_id)
 
     @router.get("/users/")
-    # returns all users auth-info
+    # returns all users src-info
     def get_all_users():
         return router.controller.get_all()
 

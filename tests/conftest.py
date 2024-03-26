@@ -3,7 +3,7 @@ import pytest
 import json
 
 
-from microservices.auth_service.app import TrashAssApplication
+from microservices.auth_service.auth.app import TrashAssApplication
 from migrator.migrator import Migrator
 
 db_config = "tests/config/db_config.json"

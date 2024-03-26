@@ -1,16 +1,15 @@
 import psycopg2
 from flask import make_response, Response, request
 
-from microservices.auth_service.services.auth_service import Service
-from microservices.auth_service.storage.entities.serializers import UserSerializer
+from src.services.auth_service import Service
+from src.storage.entities.serializers import UserSerializer
 
-from microservices.auth_service.exceptions import repository_exceptions, service_exceptions
-from microservices.auth_service.controllers.validators import (make_response_from_exception,
-                                                               authentication_required,
-                                                               permissions_required,
-                                                               fields_required,
-                                                               refresh_required)
-
+from src.exceptions import service_exceptions, repository_exceptions
+from src.controllers.validators import (make_response_from_exception,
+                                        authentication_required,
+                                        permissions_required,
+                                        fields_required,
+                                        refresh_required)
 
 class Controller:
 

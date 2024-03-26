@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "trash-project"
+name = "auth-service"
 version = "0.1.0"
 description = ""
 authors = ["Arkhip McNutt <ortiz47@mail.ru>"]
@@ -7,10 +7,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+psycopg2-binary = "^2.9.9"
 flask = "^3.0.2"
 pypika = "^0.48.9"
-psycopg2-binary = "^2.9.9"
-pytest = "^8.1.1"
 pyjwt = "^2.8.0"
 
 
