@@ -2,6 +2,8 @@
 *.excalidraw
 .venv
 tmp.py
+*.env
+jwt_secret.txt
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
