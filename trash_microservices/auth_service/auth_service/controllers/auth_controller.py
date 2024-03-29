@@ -82,14 +82,14 @@ class Controller:
         user = UserSerializer.deserialize({"email": request.json["email"],
                                            "password": request.json["password"]})
         try:
-            self.service.create(user)
+            id_ = self.service.create(user)
 
         except repository_exceptions.UniqueConstraintError as err:
             return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response("200", 200)
+        return make_response(str(id_), 200)
 
     @access_required
     @fields_required(['email', 'password'])
@@ -98,14 +98,14 @@ class Controller:
         admin = UserSerializer.deserialize({"email": request.json["email"],
                                            "password": request.json["password"]})
         try:
-            self.service.create_admin(admin)
+            id_ = self.service.create_admin(admin)
 
         except repository_exceptions.UniqueConstraintError as err:
             return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response("200", 200)
+        return make_response(str(id_), 200)
 
     @access_required
     @permissions_required(['DELETE ANY USER'])

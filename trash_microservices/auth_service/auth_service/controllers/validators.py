@@ -88,7 +88,7 @@ def permissions_required(permissions: list):
     return permissions_decorator
 
 
-def make_response_from_exception(err: Exception, status: int, response: str) -> Response:
+def make_response_from_exception(err, status: int, response: str) -> Response:
     # converts error and all its data into a Response object
     if hasattr(err, "__name__"):
         current_app.logger.error(f"{err.__name__}: {response}")
