@@ -8,6 +8,7 @@ include = [
     "auth_service/config/app/app_config.json",
     "auth_service/config/app/jwt_secret.txt",
     "auth_service/config/database/db_config.json",
+    "auth_service/config/app/logger_config.json"
 ]
 
 [tool.poetry.dependencies]
@@ -16,7 +17,6 @@ psycopg2-binary = "^2.9.9"
 flask = "^3.0.2"
 pypika = "^0.48.9"
 pyjwt = "^2.8.0"
-pytest = "^8.1.1"
 
 [tool.setuptools]
 include-package-data = true

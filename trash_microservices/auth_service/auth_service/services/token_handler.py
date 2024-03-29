@@ -1,23 +1,23 @@
 from datetime import timezone, datetime, timedelta
 import jwt
 
+from flask import current_app
+
 from auth_service.exceptions import token_exceptions
 
 
 class TokenHandler:
     def __init__(self):
-        self.secret = open("auth_service/config/app/jwt_secret.txt").read()
+        self.secret = current_app.secret_key
         self.algorithm = "HS256"
 
     def generate_access(self, id_, email, role, permissions) -> str:
         payload = self._generate_access_payload(id_, email, role, permissions)
-
         access_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=self.secret)
         return access_token
 
     def generate_refresh(self, id_) -> str:
         payload = self._generate_refresh_payload(id_)
-
         refresh_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=self.secret)
         return refresh_token
 

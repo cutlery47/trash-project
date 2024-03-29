@@ -6,7 +6,7 @@ from auth_service.storage.entities.serializers import UserSerializer
 
 from auth_service.exceptions import service_exceptions, repository_exceptions
 from auth_service.controllers.validators import (make_response_from_exception,
-                                                 authentication_required,
+                                                 access_required,
                                                  permissions_required,
                                                  fields_required,
                                                  refresh_required)
@@ -18,7 +18,7 @@ class Controller:
         self.service = service
         self.serializer = UserSerializer()
 
-    @authentication_required
+    @access_required
     def validate(self) -> Response:
         return make_response("200", 200)
 
@@ -53,7 +53,7 @@ class Controller:
 
         return make_response(new_access_token, 200)
 
-    @authentication_required
+    @access_required
     @permissions_required(['GET SINGLE USER DATA'])
     def get(self, id_: int) -> Response:
         try:
@@ -66,7 +66,7 @@ class Controller:
 
         return make_response(self.serializer.serialize(response), 200)
 
-    @authentication_required
+    @access_required
     @permissions_required(['GET MULTIPLE USERS DATA'])
     def get_all(self) -> Response:
         try:
@@ -91,7 +91,7 @@ class Controller:
 
         return make_response("200", 200)
 
-    @authentication_required
+    @access_required
     @fields_required(['email', 'password'])
     @permissions_required(['CREATE ADMIN'])
     def create_admin(self) -> Response:
@@ -107,7 +107,7 @@ class Controller:
 
         return make_response("200", 200)
 
-    @authentication_required
+    @access_required
     @permissions_required(['DELETE ANY USER'])
     def delete(self, id_: int) -> Response:
         try:
@@ -120,7 +120,7 @@ class Controller:
 
         return make_response("200", 200)
 
-    @authentication_required
+    @access_required
     @permissions_required(['UPDATE ANY USER DATA'])
     def update(self, id_: int) -> Response:
         user = UserSerializer.deserialize({"email": request.json["email"],
@@ -136,7 +136,7 @@ class Controller:
 
         return make_response("200", 200)
 
-    @authentication_required
+    @access_required
     @permissions_required(['GET ANY USER ROLE'])
     def get_user_role(self, id_: int) -> Response:
         try:
@@ -149,7 +149,7 @@ class Controller:
 
         return make_response(role, 200)
 
-    @authentication_required
+    @access_required
     @permissions_required(['GET ANY USER PERMISSION'])
     def get_user_permissions(self, id_: int) -> Response:
         try:

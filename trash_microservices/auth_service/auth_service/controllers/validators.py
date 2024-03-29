@@ -8,8 +8,10 @@ from auth_service.exceptions.controller_exceptions import (RequiredFieldsNotProv
 from auth_service.exceptions.token_exceptions import TokenIsInvalid
 
 
+# TODO: email and password validators
+
 # authentication decorator
-def authentication_required(func):
+def access_required(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         # checks that access token is present
@@ -19,6 +21,7 @@ def authentication_required(func):
             return access_validation_response
 
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -32,6 +35,7 @@ def refresh_required(func):
             return refresh_validation_response
 
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -42,11 +46,13 @@ def fields_required(fields: list):
         def wrapper(*args, **kwargs):
             # checks that all required fields are present
             input_validator_response = InputValidator.validate_required(fields, request.json)
-            if input_validator_response is not None:
+            if input_validator_response is not True:
                 return input_validator_response
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return fields_decorator
 
 
@@ -76,13 +82,18 @@ def permissions_required(permissions: list):
                     return permissions_validator_response
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return permissions_decorator
 
 
-def make_response_from_exception(err, status: int, response: str) -> Response:
+def make_response_from_exception(err: Exception, status: int, response: str) -> Response:
     # converts error and all its data into a Response object
-    current_app.logger.error(f"{type(err).__name__}: {str(err)}")
+    if hasattr(err, "__name__"):
+        current_app.logger.error(f"{err.__name__}: {response}")
+    else:
+        current_app.logger.error(f"{type(err).__name__}: {response}")
     return make_response(response, status)
 
 
@@ -93,7 +104,7 @@ class InputValidator:
             # if any of the required fields is not present -- throwing errrrrror
             if not json.get(field):
                 return make_response_from_exception(
-                    RequiredFieldsNotProvidedError, 400, f"Desired key: \"{field}\" is not provided"
+                    RequiredFieldsNotProvidedError, 400, f"Desired field: \"{field}\" is not provided"
                 )
 
         return True
@@ -104,7 +115,7 @@ class InputValidator:
             # if any of the forbidden fields is present -- throwing errror
             if json.get(field):
                 return make_response_from_exception(
-                    ForbiddenFieldsProvidedError, 400, f"Forbidden key: \"{field}\" is provided"
+                    ForbiddenFieldsProvidedError, 400, f"Forbidden field: \"{field}\" is provided"
                 )
 
         return True
@@ -124,7 +135,7 @@ class TokenValidator:
             TokenHandler().verify(access_token)
 
         except TokenIsInvalid as err:
-            return make_response_from_exception(err, 403, "Access token is invalid")
+            return make_response_from_exception(type(err), 403, "Access token is invalid")
 
         return True
 
@@ -141,7 +152,7 @@ class TokenValidator:
             TokenHandler().verify(refresh_token)
 
         except TokenIsInvalid as err:
-            return make_response_from_exception(err, 403, "Refresh token is invalid")
+            return make_response_from_exception(type(err), 403, "Refresh token is invalid")
 
         return True
 
