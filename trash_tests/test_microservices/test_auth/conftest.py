@@ -20,8 +20,7 @@ teardown_path = "auth_migrations/teardown/"
 def app():
     app = TrashAssApplication.create(db_config=db_config,
                                      logger_config=logger_config,
-                                     jwt_secret_path=jwt_secret_path
-                                     )
+                                     jwt_secret_path=jwt_secret_path)
     app.testing = True
 
     try:
