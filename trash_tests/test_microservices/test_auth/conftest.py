@@ -1,7 +1,8 @@
+import json
+import os
+
 from psycopg2 import DatabaseError
 import pytest
-import json
-
 
 from auth_service.app import TrashAssApplication
 from migrator.migrator import Migrator
@@ -10,12 +11,14 @@ db_config = "config/db_config.json"
 
 user = json.load(open(db_config)).get('USER')
 dbname = json.load(open(db_config)).get('DBNAME')
-setup_path = "migrator/migrations/auth/setup/"
-teardown_path = "migrator/migrations/auth/teardown/"
+setup_path = "test_microservices/test_auth/auth_migrations/setup/"
+teardown_path = "test_microservices/test_auth/auth_migrations/teardown/"
 
 
 @pytest.fixture(scope='session')
 def app():
+    print(os.getcwd())
+
     app = TrashAssApplication.create(db_config=db_config)
     app.testing = True
 

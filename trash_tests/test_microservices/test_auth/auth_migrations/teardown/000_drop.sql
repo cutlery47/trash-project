@@ -1,0 +1,9 @@
+DROP TABLE "Users" CASCADE;
+
+DROP TABLE "Roles" CASCADE;
+
+DROP TABLE "Permissions" CASCADE;
+
+DROP TABLE "RolePermissions" CASCADE;
+
+END;
