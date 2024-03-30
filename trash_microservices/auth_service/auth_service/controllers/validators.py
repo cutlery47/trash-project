@@ -1,11 +1,11 @@
 import functools
 
 from flask import current_app, make_response, Response, request
-from auth_service.services.token_handler import TokenHandler
+from auth_service.services.handlers import TokenHandler
 
 from auth_service.exceptions.controller_exceptions import (RequiredFieldsNotProvidedError, PermissionsNotGrantedError,
                                                            ForbiddenFieldsProvidedError)
-from auth_service.exceptions.token_exceptions import TokenIsInvalid
+from auth_service.exceptions.service_exceptions import TokenIsInvalid
 
 
 # TODO: email and password validators

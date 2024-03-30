@@ -1,9 +1,8 @@
-import hashlib
 import random
 
 from auth_service.storage.entities.entities import User
 from auth_service.storage.repositories.auth_repository import Repository
-from auth_service.services.token_handler import TokenHandler
+from auth_service.services.handlers import TokenHandler, PasswordHandler, EmailHandler
 
 from auth_service.exceptions import service_exceptions, repository_exceptions
 
@@ -27,7 +26,7 @@ class Service:
 
     def authenticate(self, email, password) -> User:
         user = self.get_by_email(email)
-        if user.password != self.hash_password(password):
+        if user.password != PasswordHandler().hash(password):
             raise (service_exceptions.
                    PasswordDoesNotMatchError("Password doesnt match the stored one"))
         return user
@@ -60,17 +59,19 @@ class Service:
         users = self.repo.get_all(secure)
         return users
 
-    def create(self, user: User) -> bool:
+    def create(self, user: User, role_id: int) -> bool:
         user.id = self.randomize_id(1, 2 ** 31 - 1)
-        user.role_id = 0
-        user.password = self.hash_password(user.password)
-        return self.repo.create(user)
+        user.role_id = role_id
 
-    def create_admin(self, admin: User) -> bool:
-        admin.id = self.randomize_id(1, 2 ** 31 - 1)
-        admin.role_id = 1
-        admin.password = self.hash_password(admin.password)
-        return self.repo.create(admin)
+        # email validation + normalization
+        user.email = EmailHandler.validate(user.email)
+
+        password_handler = PasswordHandler()
+        # password validation + hashing
+        password_handler.validate(user.password)
+        user.password = password_handler.hash(user.password)
+
+        return self.repo.create(user)
 
     def delete(self, id_: int) -> bool:
         return self.repo.delete(id_)
@@ -83,11 +84,6 @@ class Service:
 
     def get_user_permissions(self, id_) -> list[str]:
         return self.repo.get_permissions(id_)
-
-    def hash_password(self, plain_passwd):
-        hasher = hashlib.sha256()
-        hasher.update(plain_passwd.encode())
-        return hasher.hexdigest()
 
     def randomize_id(self, lower_bound: int, upper_bound: int) -> int:
         while True:

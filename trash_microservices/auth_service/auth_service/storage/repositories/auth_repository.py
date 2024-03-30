@@ -94,6 +94,7 @@ class Repository:
             user_data.email,
             user_data.password
         ).get_sql()
+
         try:
             self.cursor.execute(q)
         except psycopg2.IntegrityError:

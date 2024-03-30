@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auth_service"
-version = "0.1.0"
+version = "0.0.2"
 description = ""
 authors = ["Arkhip McNutt <ortiz47@mail.ru>"]
 readme = "README.md"
@@ -17,6 +17,7 @@ psycopg2-binary = "^2.9.9"
 flask = "^3.0.2"
 pypika = "^0.48.9"
 pyjwt = "^2.8.0"
+email-validator = "^2.1.1"
 
 [tool.setuptools]
 include-package-data = true

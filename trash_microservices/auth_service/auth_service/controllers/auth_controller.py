@@ -81,10 +81,12 @@ class Controller:
     def create(self) -> Response:
         user = UserSerializer.deserialize({"email": request.json["email"],
                                            "password": request.json["password"]})
+        # role_id = 0 -- "User" role
         try:
-            id_ = self.service.create(user)
+            id_ = self.service.create(user, role_id=0)
 
-        except repository_exceptions.UniqueConstraintError as err:
+        except (repository_exceptions.UniqueConstraintError, service_exceptions.PasswordException,
+                service_exceptions.EmailException) as err:
             return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return make_response_from_exception(err, 500, "Unexpected error happened on the server")
@@ -97,10 +99,11 @@ class Controller:
     def create_admin(self) -> Response:
         admin = UserSerializer.deserialize({"email": request.json["email"],
                                            "password": request.json["password"]})
+        # role_id = 0 -- "Admin" role
         try:
-            id_ = self.service.create_admin(admin)
+            id_ = self.service.create(admin, role_id=1)
 
-        except repository_exceptions.UniqueConstraintError as err:
+        except (repository_exceptions.UniqueConstraintError, service_exceptions.PasswordException) as err:
             return make_response_from_exception(err, 400, str(err))
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return make_response_from_exception(err, 500, "Unexpected error happened on the server")
