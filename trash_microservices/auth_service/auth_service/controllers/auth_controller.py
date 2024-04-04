@@ -1,7 +1,7 @@
 import psycopg2
 from flask import make_response, Response, request
 
-from auth_service.services.auth_service import Service
+from auth_service.services.auth_service import AuthService
 from auth_service.storage.entities.serializers import UserSerializer
 
 from auth_service.exceptions import service_exceptions, repository_exceptions
@@ -11,12 +11,14 @@ from auth_service.controllers.validators import (make_response_from_exception,
                                                  fields_required,
                                                  refresh_required)
 
+# TODO: new permissions system
 
-class Controller:
 
-    def __init__(self, service: Service):
+class AuthController:
+
+    def __init__(self, service: AuthService, serializer: UserSerializer):
         self.service = service
-        self.serializer = UserSerializer()
+        self.serializer = serializer
 
     @access_required
     def validate(self) -> Response:
@@ -75,11 +77,11 @@ class Controller:
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response([UserSerializer.serialize(response) for response in responses], 200)
+        return make_response([self.serializer.serialize(response) for response in responses], 200)
 
     @fields_required(['email', 'password'])
     def create(self) -> Response:
-        user = UserSerializer.deserialize({"email": request.json["email"],
+        user = self.serializer.deserialize({"email": request.json["email"],
                                            "password": request.json["password"]})
         # role_id = 0 -- "User" role
         try:
@@ -97,9 +99,9 @@ class Controller:
     @fields_required(['email', 'password'])
     @permissions_required(['CREATE ADMIN'])
     def create_admin(self) -> Response:
-        admin = UserSerializer.deserialize({"email": request.json["email"],
-                                           "password": request.json["password"]})
-        # role_id = 0 -- "Admin" role
+        admin = self.serializer.deserialize({"email": request.json["email"],
+                                            "password": request.json["password"]})
+        # role_id = 1 -- "Admin" role
         try:
             id_ = self.service.create(admin, role_id=1)
 
@@ -111,7 +113,6 @@ class Controller:
         return make_response(str(id_), 200)
 
     @access_required
-    @permissions_required(['DELETE ANY USER'])
     def delete(self, id_: int) -> Response:
         try:
             self.service.delete(id_)
@@ -124,9 +125,8 @@ class Controller:
         return make_response("200", 200)
 
     @access_required
-    @permissions_required(['UPDATE ANY USER DATA'])
     def update(self, id_: int) -> Response:
-        user = UserSerializer.deserialize({"email": request.json["email"],
+        user = self.serializer.deserialize({"email": request.json["email"],
                                            "password": request.json["password"]})
 
         try:
@@ -140,7 +140,6 @@ class Controller:
         return make_response("200", 200)
 
     @access_required
-    @permissions_required(['GET ANY USER ROLE'])
     def get_user_role(self, id_: int) -> Response:
         try:
             role = self.service.get_user_role(id_)
@@ -153,7 +152,6 @@ class Controller:
         return make_response(role, 200)
 
     @access_required
-    @permissions_required(['GET ANY USER PERMISSION'])
     def get_user_permissions(self, id_: int) -> Response:
         try:
             permissions = self.service.get_user_permissions(id_)

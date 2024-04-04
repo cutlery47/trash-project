@@ -10,6 +10,10 @@ class UserNotFoundError(RepositoryError):
     pass
 
 
+class FieldsNotProvidedError(RepositoryError):
+    pass
+
+
 class RoleNotFoundError(RepositoryError):
     pass
 

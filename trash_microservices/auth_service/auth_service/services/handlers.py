@@ -11,22 +11,21 @@ from auth_service.exceptions import service_exceptions
 
 class TokenHandler:
     def __init__(self):
-        self.secret = current_app.secret_key
         self.algorithm = "HS256"
 
     def generate_access(self, id_, email, role, permissions) -> str:
         payload = self._generate_access_payload(id_, email, role, permissions)
-        access_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=self.secret)
+        access_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=current_app.secret_key)
         return access_token
 
     def generate_refresh(self, id_) -> str:
         payload = self._generate_refresh_payload(id_)
-        refresh_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=self.secret)
+        refresh_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=current_app.secret_key)
         return refresh_token
 
     def verify(self, token):
         try:
-            decoded = jwt.decode(token, algorithms=self.algorithm, key=self.secret)
+            decoded = jwt.decode(token, algorithms=self.algorithm, key=current_app.secret_key)
 
         except jwt.PyJWTError as err:
             raise service_exceptions.TokenIsInvalid(str(err))
@@ -35,7 +34,7 @@ class TokenHandler:
 
     def decode(self, token) -> dict:
         # simply decodes all the data without any verification
-        return jwt.decode(token, algorithms=self.algorithm, key=self.secret, options={"verify_signature": False})
+        return jwt.decode(token, algorithms=self.algorithm, key=current_app.secret_key, options={"verify_signature": False})
 
     @staticmethod
     def _generate_access_payload(id_, email, role, permissions) -> dict:

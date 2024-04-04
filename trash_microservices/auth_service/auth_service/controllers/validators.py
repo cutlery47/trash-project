@@ -8,8 +8,6 @@ from auth_service.exceptions.controller_exceptions import (RequiredFieldsNotProv
 from auth_service.exceptions.service_exceptions import TokenIsInvalid
 
 
-# TODO: email and password validators
-
 # authentication decorator
 def access_required(func):
     @functools.wraps(func)
@@ -61,13 +59,7 @@ def permissions_required(permissions: list):
     def permissions_decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            # checks if user has matching permissions
-            if permissions is not None:
-                permissions_validator_response = PermissionValidator.has_permissions(permissions, request.json)
-                if permissions_validator_response is not True:
-                    return permissions_validator_response
-
-            # wrapper function receive 1 to 2 arguments:
+            # wrapper function receives 1 to 2 arguments:
             # 1st argument is always the WRAPPED function
             # 2nd argument is optional and IS USER ID
             # if it is present => we have to check if user is allowed to manipulate data by the id
@@ -78,6 +70,12 @@ def permissions_required(permissions: list):
             # if user id argument was passed -- check for access
             if id_ is not None:
                 permissions_validator_response = PermissionValidator.has_access_to_data(id_, request.json)
+                if permissions_validator_response is not True:
+                    return permissions_validator_response
+
+            # checks if user has matching permissions
+            if permissions is not None:
+                permissions_validator_response = PermissionValidator.has_permissions(permissions, request.json)
                 if permissions_validator_response is not True:
                     return permissions_validator_response
 
