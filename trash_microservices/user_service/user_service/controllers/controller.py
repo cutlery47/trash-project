@@ -1,7 +1,7 @@
 import psycopg2
 from flask import make_response, Response, request
 
-from auth_service.services.auth_service import AuthService
+from auth_service.services.service import AuthService
 from auth_service.storage.entities.serializers import UserSerializer
 
 from auth_service.exceptions import service_exceptions, repository_exceptions

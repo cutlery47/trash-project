@@ -7,6 +7,5 @@ class FactoryInterface(ABC):
     def create(cls,
                app_config,
                db_config,
-               logger_config,
                jwt_secret_path):
         raise NotImplementedError

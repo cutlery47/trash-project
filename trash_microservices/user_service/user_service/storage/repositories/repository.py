@@ -5,7 +5,7 @@ import psycopg2
 from auth_service.storage.entities.entities import User
 from auth_service.config.database.db_config import DBConfig
 from auth_service.storage.repositories.query_builder import QueryBuilder
-from auth_service.interfaces.auth_repository_interface import AuthRepositoryInterface
+from auth_service.interfaces.repository_interface import AuthRepositoryInterface
 
 from auth_service.exceptions import repository_exceptions
 

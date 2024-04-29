@@ -1,7 +1,7 @@
 import random
 
 from auth_service.storage.entities.entities import User
-from auth_service.storage.repositories.auth_repository import AuthRepository
+from auth_service.storage.repositories.repository import AuthRepository
 from auth_service.services.handlers import TokenHandler, PasswordHandler, EmailHandler
 
 from auth_service.exceptions import service_exceptions, repository_exceptions
