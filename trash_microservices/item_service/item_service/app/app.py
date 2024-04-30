@@ -1,8 +1,7 @@
 from django.core.wsgi import get_wsgi_application
-from django.urls import path, include
 
 from item_service.controller.controller import Controller
-from item_service.repository.repository import Repository
+from item_service.storage.repository import Repository
 from item_service.router.router import Router
 from item_service.service.service import Service
 
