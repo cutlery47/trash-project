@@ -5,8 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from item_service.storage.entities import Base
-from item_service.storage.entities import Item, Review, Category
+from item_service.storage.models import Base
+from item_service.storage.models import Item, Review, Category
 
 import os
 

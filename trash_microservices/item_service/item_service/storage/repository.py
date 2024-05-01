@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from item_service.storage.entities import Item
+from item_service.storage.models import Item, UserItem
 
-from item_service.storage.entities import Base
+from item_service.storage.models import Base
 
 import json
 
@@ -12,9 +12,9 @@ class Repository:
         self.engine = create_engine("postgresql+psycopg2://cutlery:12345@localhost:5432/item_service")
         Base.metadata.create_all(self.engine)
 
-    def add(self, request):
-        request = json.loads(request.body.decode())
-        obj = Item(**request)
+    def add(self, item: Item, user_item: UserItem):
         with Session(self.engine) as session:
-            session.add(obj)
+            session.add(item)
+            session.add(user_item)
             session.commit()
+            

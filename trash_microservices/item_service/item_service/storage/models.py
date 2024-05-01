@@ -23,6 +23,7 @@ class Item(Base):
     price: Mapped[float]
     in_stock: Mapped[int]
     image: Mapped[Optional[str_256]]
+
 class Category(Base):
     __tablename__ = "categories"
 
@@ -38,5 +39,13 @@ class Review(Base):
     text: Mapped[Optional[text]]
     rating: Mapped[Optional[float]]
     reviewed_at: Mapped[timestamp]
+
+class UserItem(Base):
+    __tablename__ = "user_items"
+
+    id: Mapped[pk]
+    user_id: Mapped[int]
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"))
+
 
 
