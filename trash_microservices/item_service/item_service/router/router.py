@@ -1,13 +1,13 @@
-from django.urls import path
+from item_service.interfaces.router import RouterInterface
+from item_service.interfaces.controller import ControllerInterface
 
-class Router:
-    def __init__(self, controller):
+
+class Router(RouterInterface):
+    def __init__(self, controller: ControllerInterface):
         self.controller = controller
-        self.routes = self.set_routes()
 
     def set_routes(self):
-        return [
-            path("", self.controller.home),
-            path("add/", self.controller.add)
-        ]
+        pass
+
+
 

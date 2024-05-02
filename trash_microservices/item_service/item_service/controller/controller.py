@@ -1,19 +1,9 @@
-from django.http import JsonResponse
+from item_service.interfaces.service import ServiceInterface
+from item_service.interfaces.controller import ControllerInterface
 
-from item_service.controller.validators import validate_http_method
-
-class Controller:
-    def __init__(self, service):
+class Controller(ControllerInterface):
+    def __init__(self, service: ServiceInterface):
         self.service = service
 
-    def home(self, request):
-        validate_http_method(request, ['GET'])
-
-        res = self.service.home(request)
-        return JsonResponse(res)
-
-    def add(self, request):
-        validate_http_method(request, ['POST'])
-
-        res = self.service.add(request)
-        return JsonResponse(res)
+    def do_shi(self, data):
+        return self.service.do_shi(data)

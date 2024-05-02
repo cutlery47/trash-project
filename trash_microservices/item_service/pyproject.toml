@@ -10,6 +10,7 @@ python = "^3.10"
 sqlalchemy = "^2.0.29"
 psycopg2-binary = "^2.9.9"
 alembic = "^1.13.1"
+fastapi = {extras = ["all"], version = "^0.110.3"}
 
 
 [build-system]
