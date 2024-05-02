@@ -4,8 +4,8 @@ from item_service.storage.models import UserItem, Item
 
 class RepositoryInterface:
     @abstractmethod
-    def __init__(self):
+    def __init__(self) -> None:
         raise NotImplementedError
 
-    def add_item(self, item: Item, user_item: UserItem):
+    async def add_item(self, item: Item, user_item: UserItem) -> None:
         raise NotImplementedError

@@ -20,7 +20,7 @@ class ApplicationFactory:
         controller = controller(service)
         router = router(controller)
 
-        self.app = application(router, **app_config)
+        self.app = application(router, app_config)
 
     def create(self) -> FastAPI:
         return self.app.asgi_app()

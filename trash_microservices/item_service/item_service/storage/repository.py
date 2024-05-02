@@ -10,7 +10,7 @@ class Repository(RepositoryInterface):
         self.engine = create_engine("postgresql+psycopg2://cutlery:12345@localhost:5432/item_service")
         Base.metadata.create_all(self.engine)
 
-    def add_item(self, item: Item, user_item: UserItem):
+    async def add_item(self, item: Item, user_item: UserItem):
         with Session(self.engine) as session:
             session.add(item)
             session.add(user_item)
