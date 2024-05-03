@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 
-from item_service.interfaces.service import ServiceInterface
+from item_service.interfaces.base_service import BaseService
 
 from fastapi.routing import APIRouter
 
-class ControllerInterface(ABC):
+class BaseController(ABC):
     @abstractmethod
     def __init__(self,
-                 item_service: ServiceInterface,
-                 review_service: ServiceInterface,
-                 category_service: ServiceInterface
+                 item_service: BaseService,
+                 review_service: BaseService,
+                 category_service: BaseService
                  ) -> None:
         raise NotImplementedError
 

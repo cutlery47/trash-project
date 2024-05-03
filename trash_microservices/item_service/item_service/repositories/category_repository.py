@@ -1,9 +1,9 @@
-from item_service.interfaces.repository import RepositoryInterface
+from item_service.interfaces.base_repository import BaseRepository
 from item_service.repositories.models.models import Category
 
 from sqlalchemy.engine import Engine
 
-class CategoryRepository(RepositoryInterface[Category]):
+class CategoryRepository(BaseRepository[Category]):
     def __init__(self, engine: Engine):
         self.engine = engine
 

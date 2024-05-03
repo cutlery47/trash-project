@@ -20,7 +20,8 @@ factory = ApplicationFactory(application=Application,
                              review_repository=ReviewRepository,
                              category_repository=CategoryRepository,
 
-                             db_config={},
-                             app_config={})
+                             db_config_path="item_service/config/db_config.json",
+                             app_config_path="item_service/config/app_config.json"
+                             )
 # === Entrypoint ===
 app = factory.create()

@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 
-from item_service.interfaces.controller import ControllerInterface
+from item_service.interfaces.base_controller import BaseController
 
 from fastapi import FastAPI
 
 # I fell like this one is redundant
 # Might delete later
-class ApplicationInterface(ABC):
+class BaseApplication(ABC):
     @abstractmethod
-    def __init__(self, controller: ControllerInterface, config: dict) -> None:
+    def __init__(self, controller: BaseController, config: dict) -> None:
         raise NotImplementedError
 
     @abstractmethod

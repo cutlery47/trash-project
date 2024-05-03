@@ -1,14 +1,14 @@
 from fastapi import APIRouter
 
-from item_service.interfaces.service import ServiceInterface
-from item_service.interfaces.controller import ControllerInterface
+from item_service.interfaces.base_service import BaseService
+from item_service.interfaces.base_controller import BaseController
 
-class Controller(ControllerInterface):
+class Controller(BaseController):
 
     def __init__(self,
-                 item_service: ServiceInterface,
-                 review_service: ServiceInterface,
-                 category_service: ServiceInterface):
+                 item_service: BaseService,
+                 review_service: BaseService,
+                 category_service: BaseService):
         self.item_service = item_service
         self.review_service = review_service
         self.category_service = category_service

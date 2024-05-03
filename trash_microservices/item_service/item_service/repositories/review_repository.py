@@ -1,9 +1,9 @@
-from item_service.interfaces.repository import RepositoryInterface
+from item_service.interfaces.base_repository import BaseRepository
 from item_service.repositories.models.models import Review
 
 from sqlalchemy.engine import Engine
 
-class ReviewRepository(RepositoryInterface[Review]):
+class ReviewRepository(BaseRepository[Review]):
     def __init__(self, engine: Engine) -> None:
         self.engine = engine
 

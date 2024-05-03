@@ -1,10 +1,10 @@
-from item_service.interfaces.service import ServiceInterface
-from item_service.interfaces.repository import RepositoryInterface
+from item_service.interfaces.base_service import BaseService
+from item_service.interfaces.base_repository import BaseRepository
 from item_service.schemas.review_schema import BaseReview, Review, ReviewAdd
 
 
-class ReviewService(ServiceInterface[BaseReview]):
-    def __init__(self, repository: RepositoryInterface):
+class ReviewService(BaseService[BaseReview]):
+    def __init__(self, repository: BaseRepository):
         self.repository = repository
 
     async def create(self, review: ReviewAdd) -> None:

@@ -1,25 +1,28 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy.engine import Engine
+from item_service.interfaces.base_repository import BaseRepository
+from item_service.schemas.item_schema import BaseItem
+from item_service.schemas.review_schema import BaseReview
+from item_service.schemas.category_schema import BaseCategory
 
-class RepositoryInterface[Entity](ABC):
+class BaseService[Entity: (BaseItem, BaseReview, BaseCategory)](ABC):
     @abstractmethod
-    def __init__(self, engine: Engine) -> None:
+    def __init__(self, repository: BaseRepository):
         raise NotImplementedError
 
     @abstractmethod
-    async def create(self, entity: Entity) -> None:
+    async def create(self, entity_id: int) -> None:
         """
-        Creates a new entity in the repositories.
-        :param entity:
+        Carries out business logic to create a new entity.
+        :param entity_id:
         :return:
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def get(self, entity_id: Entity) -> Entity:
+    async def get(self, entity_id: int) -> Entity:
         """
-        Retrieves an entity from the repositories.
+        Carries out business logic to get a specific entity.
         :param entity_id:
         :return:
         """
@@ -28,7 +31,7 @@ class RepositoryInterface[Entity](ABC):
     @abstractmethod
     async def get_all(self) -> list[Entity]:
         """
-        Retrieves all entities from the repositories.
+        Carries out business logic to get all entities.
         :return:
         """
         raise NotImplementedError
@@ -36,7 +39,7 @@ class RepositoryInterface[Entity](ABC):
     @abstractmethod
     async def update(self, entity_id: int, entity: Entity) -> None:
         """
-        Updates an entity in the repositories.
+        Carries out business logic to update a specific entity.
         :param entity_id:
         :param entity:
         :return:
@@ -46,7 +49,7 @@ class RepositoryInterface[Entity](ABC):
     @abstractmethod
     async def delete(self, entity_id: int) -> None:
         """
-        Deletes an entity from the repositories.
+        Carries out business logic to delete a specific entity.
         :param entity_id:
         :return:
         """
