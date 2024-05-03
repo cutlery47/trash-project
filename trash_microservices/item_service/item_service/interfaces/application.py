@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from item_service.interfaces.router import RouterInterface
+from item_service.interfaces.controller import ControllerInterface
 
 from fastapi import FastAPI
 
@@ -8,9 +8,14 @@ from fastapi import FastAPI
 # Might delete later
 class ApplicationInterface(ABC):
     @abstractmethod
-    def __init__(self, router: RouterInterface, config: dict) -> None:
+    def __init__(self, controller: ControllerInterface, config: dict) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def asgi_app(self) -> FastAPI:
+        """
+        After initialization, you would create
+        an entrypoint by calling this function
+        :return: ASGI application, runnable by uvicorn
+        """
         raise NotImplementedError

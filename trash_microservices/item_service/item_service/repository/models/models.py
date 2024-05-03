@@ -4,10 +4,10 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 
-from item_service.storage.annotated_types import str_256
-from item_service.storage.annotated_types import text
-from item_service.storage.annotated_types import pk
-from item_service.storage.annotated_types import timestamp
+from item_service.repository.entities.annotated_types import str_256
+from item_service.repository.entities.annotated_types import text
+from item_service.repository.entities.annotated_types import pk
+from item_service.repository.entities.annotated_types import timestamp
 
 from typing import Optional
 

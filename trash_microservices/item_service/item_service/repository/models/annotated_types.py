@@ -7,7 +7,6 @@ from sqlalchemy.orm import mapped_column
 
 import datetime
 
-
 str_256 = Annotated[str, mapped_column(types.String(256))]
 text = Annotated[str, mapped_column(types.String(256))]
 pk = Annotated[int, mapped_column(types.BIGINT, primary_key=True)]
