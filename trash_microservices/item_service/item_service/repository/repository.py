@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from item_service.storage.models import Item, UserItem, Base
+from item_service.repository.models.models import Item, UserItem, Base
 
 from item_service.interfaces.repository import RepositoryInterface
 

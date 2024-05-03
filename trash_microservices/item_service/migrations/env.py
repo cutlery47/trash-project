@@ -5,8 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from item_service.storage.models import Base
-from item_service.storage.models import Item, Review, Category
+from item_service.repository.models.models import Base
+from item_service.repository.models.models import Item, Review, Category
 
 import os
 
@@ -20,7 +20,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# telling alembic which models to autogenerate
+# telling alembic which schemas to autogenerate
 target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:

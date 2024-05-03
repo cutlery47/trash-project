@@ -1,9 +1,15 @@
+from fastapi import APIRouter
+
 from item_service.interfaces.service import ServiceInterface
 from item_service.interfaces.controller import ControllerInterface
 
 class Controller(ControllerInterface):
+
     def __init__(self, service: ServiceInterface):
         self.service = service
 
-    async def do_shi(self, data):
-        return self.service.do_shi(data)
+    def setup_api(self) -> None:
+        pass
+
+    def get_api(self) -> APIRouter:
+        pass

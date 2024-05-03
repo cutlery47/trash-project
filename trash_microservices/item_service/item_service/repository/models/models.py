@@ -1,13 +1,8 @@
 from sqlalchemy import ForeignKey
 
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase
 
-from item_service.repository.entities.annotated_types import str_256
-from item_service.repository.entities.annotated_types import text
-from item_service.repository.entities.annotated_types import pk
-from item_service.repository.entities.annotated_types import timestamp
+from item_service.repository.models.annotated_types import str_256, text, pk, timestamp
 
 from typing import Optional
 
