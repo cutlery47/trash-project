@@ -8,13 +8,15 @@ class ItemService(ServiceInterface[BaseItem]):
         self.repository = repository
 
     async def create(self, item: ItemAdd) -> None:
+        # return await self.repository.create(item)
         pass
 
     async def get(self, item_id: int) -> Item:
+        # return await self.repository.get(item_id)
         pass
 
     async def get_all(self) -> list[Item]:
-        pass
+        return await self.repository.get_all()
 
     async def update(self, item_id: int, item: ItemAdd) -> None:
         pass

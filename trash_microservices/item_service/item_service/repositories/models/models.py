@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey
 
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase
 
-from item_service.repository.models.annotated_types import str_256, text, pk, timestamp
+from item_service.repositories.models.annotated_types import str_256, text, pk, timestamp
 
 from typing import Optional
 

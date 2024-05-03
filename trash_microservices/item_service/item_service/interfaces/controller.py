@@ -6,7 +6,11 @@ from fastapi.routing import APIRouter
 
 class ControllerInterface(ABC):
     @abstractmethod
-    def __init__(self, service: ServiceInterface) -> None:
+    def __init__(self,
+                 item_service: ServiceInterface,
+                 review_service: ServiceInterface,
+                 category_service: ServiceInterface
+                 ) -> None:
         raise NotImplementedError
 
     # each of these two functions execute exactly once.
