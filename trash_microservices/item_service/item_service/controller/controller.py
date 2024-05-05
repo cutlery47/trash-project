@@ -3,6 +3,8 @@ from fastapi import APIRouter
 from item_service.interfaces.base_service import BaseService
 from item_service.interfaces.base_controller import BaseController
 
+from item_service.schemas.item_schema import ItemAdd
+
 class Controller(BaseController):
 
     def __init__(self,
@@ -26,6 +28,14 @@ class Controller(BaseController):
         @self.router.get("/items/")
         async def get_items():
             return await self.item_service.get_all()
+
+        @self.router.get("/items/{item_id}")
+        async def get_item(item_id: int):
+            return await self.item_service.get(item_id)
+
+        @self.router.post("/items/add/")
+        async def add_item(item: ItemAdd):
+            return await self.item_service.create(item)
 
     def get_api(self) -> APIRouter:
         return self.router

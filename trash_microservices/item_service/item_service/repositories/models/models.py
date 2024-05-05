@@ -6,8 +6,10 @@ from item_service.repositories.models.annotated_types import str_256, text, pk, 
 
 from typing import Optional
 
+
 class Base(DeclarativeBase):
-   pass
+    pass
+
 
 class Item(Base):
     __tablename__ = "items"
@@ -19,11 +21,13 @@ class Item(Base):
     in_stock: Mapped[int]
     image: Mapped[Optional[str_256]]
 
+
 class Category(Base):
     __tablename__ = "categories"
 
     id: Mapped[pk]
     name: Mapped[str_256]
+
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -35,12 +39,10 @@ class Review(Base):
     rating: Mapped[Optional[float]]
     reviewed_at: Mapped[timestamp]
 
+
 class UserItem(Base):
     __tablename__ = "user_items"
 
     id: Mapped[pk]
     user_id: Mapped[int]
     item_id: Mapped[int] = mapped_column(ForeignKey("items.id"))
-
-
-

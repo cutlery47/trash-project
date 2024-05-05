@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from item_service.repositories.models.models import Base
+from item_service.repositories.models.models import Base, Item, Category, Review
 
 import os
 

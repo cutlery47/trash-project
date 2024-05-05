@@ -2,8 +2,15 @@ from fastapi import FastAPI
 
 from item_service.interfaces.base_application import BaseApplication
 from item_service.interfaces.base_controller import BaseController
-from item_service.interfaces.base_service import BaseService
-from item_service.interfaces.base_repository import BaseRepository
+
+from item_service.services.item_service import ItemService
+from item_service.services.review_service import ReviewService
+from item_service.services.category_service import CategoryService
+
+from item_service.repositories.item_repository import ItemRepository
+from item_service.repositories.review_repository import ReviewRepository
+from item_service.repositories.category_repository import CategoryRepository
+
 from item_service.config.app_config import AppConfig
 from item_service.config.db_config import DBConfig
 
@@ -16,19 +23,24 @@ class ApplicationFactory:
                  application: type(BaseApplication),
                  controller: type(BaseController),
 
-                 item_service: type(BaseService),
-                 review_service: type(BaseService),
-                 category_service: type(BaseService),
+                 item_service: type(ItemService),
+                 review_service: type(ReviewService),
+                 category_service: type(CategoryService),
 
-                 item_repository: type(BaseRepository),
-                 review_repository: type(BaseRepository),
-                 category_repository: type(BaseRepository),
+                 item_repository: type(ItemRepository),
+                 review_repository: type(ReviewRepository),
+                 category_repository: type(CategoryRepository),
 
                  app_config_path: str,
                  db_config_path: str,
                  ):
         app_config, db_config = self.parse_configs(app_config_path, db_config_path)
-        alchemy_engine = create_engine(f"postgresql+psycopg2://cutlery:12345@localhost:5432/item_service")
+        alchemy_engine = create_engine(f"{db_config.driver}"
+                                       f"://{db_config.username}:"
+                                       f"{db_config.password}@"
+                                       f"{db_config.host}:"
+                                       f"{db_config.port}/"
+                                       f"{db_config.dbname}")
 
         item_service = item_service(item_repository(alchemy_engine))
         review_service = review_service(review_repository(alchemy_engine))

@@ -17,7 +17,7 @@ class BaseRepository[Entity](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get(self, entity_id: Entity) -> Entity:
+    async def get(self, entity_id: int) -> Entity:
         """
         Retrieves an entity from the repositories.
         :param entity_id:

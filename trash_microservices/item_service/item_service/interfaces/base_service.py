@@ -11,10 +11,10 @@ class BaseService[Entity: (BaseItem, BaseReview, BaseCategory)](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def create(self, entity_id: int) -> None:
+    async def create(self, entity: Entity) -> None:
         """
         Carries out business logic to create a new entity.
-        :param entity_id:
+        :param entity:
         :return:
         """
         raise NotImplementedError
