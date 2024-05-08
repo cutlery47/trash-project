@@ -1,5 +1,6 @@
 from item_service.interfaces.base_repository import BaseRepository
-from item_service.repositories.models.models import Item, UserItem
+from item_service.repositories.models.models import Item
+from item_service.exceptions.repository_exceptions import ResourceNotFoundException
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
@@ -9,14 +10,19 @@ class ItemRepository(BaseRepository[Item]):
     def __init__(self, engine: Engine) -> None:
         self.engine = engine
 
-    async def create(self, item: Item, user_item: UserItem) -> None:
+    async def create(self, item: Item) -> None:
         with Session(self.engine) as session:
             with session.begin():
                 session.add(item)
+                session.commit()
 
-    async def get(self, item_id: Item) -> Item | None:
+    # noinspection PyTypeChecker
+    async def get(self, item_id: int) -> Item:
         with Session(self.engine) as session:
-            return session.get(Item, item_id)
+            item = session.get_one(Item, item_id)
+            if item is None:
+                raise ResourceNotFoundException("Item not found")
+            return item
 
     async def get_all(self) -> list[Item]:
         with Session(self.engine) as session:
@@ -29,11 +35,3 @@ class ItemRepository(BaseRepository[Item]):
 
     async def delete(self, item_id: int):
         pass
-
-    #
-    #
-    # async def add_item(self, item: Item, user_item: UserItem):
-    #     with Session(self.engine) as session:
-    #         session.add(item)
-    #         session.add(user_item)
-    #         session.commit()

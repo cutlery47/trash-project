@@ -1,24 +1,25 @@
 from item_service.interfaces.base_service import BaseService
-from item_service.schemas.item_schema import BaseItem, Item, ItemAdd
+from item_service.schemas.item_schema import BaseItemDTO, ItemDTO, ItemAddDTO
 from item_service.repositories.models.models import Item
 from item_service.repositories.item_repository import ItemRepository
 
-class ItemService(BaseService[BaseItem]):
+class ItemService(BaseService[BaseItemDTO]):
     def __init__(self, repository: ItemRepository):
         self.repository = repository
 
-    async def create(self, item: ItemAdd) -> None:
+    async def create(self, item: ItemAddDTO) -> None:
+        orm_item = Item(**item.model_dump())
+        await self.repository.create(orm_item)
 
-        await self.repository.create(item)
+    async def get(self, item_id: int) -> ItemDTO:
+        orm_item = await self.repository.get(item_id)
+        return ItemDTO.model_validate(orm_item, from_attributes=True)
 
-    async def get(self, item_id: int) -> Item:
-        # return await self.repository.get(item_id)
-        return await self.repository.get(item_id)
+    async def get_all(self) -> list[ItemDTO]:
+        orm_items = await self.repository.get_all()
+        return [ItemDTO.model_validate(orm_item, from_attributes=True) for orm_item in orm_items]
 
-    async def get_all(self) -> list[Item]:
-        return await self.repository.get_all()
-
-    async def update(self, item_id: int, item: ItemAdd) -> None:
+    async def update(self, item_id: int, item: ItemAddDTO) -> None:
         pass
 
     async def delete(self, item_id: int) -> None:

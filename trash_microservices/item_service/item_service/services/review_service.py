@@ -1,22 +1,22 @@
 from item_service.interfaces.base_service import BaseService
-from item_service.schemas.review_schema import BaseReview, Review, ReviewAdd
+from item_service.schemas.review_schema import BaseReviewDTO, ReviewDTO, ReviewAddDTO
 from item_service.repositories.review_repository import ReviewRepository
 
 
-class ReviewService(BaseService[BaseReview]):
+class ReviewService(BaseService[BaseReviewDTO]):
     def __init__(self, repository: ReviewRepository):
         self.repository = repository
 
-    async def create(self, review: ReviewAdd) -> None:
+    async def create(self, review: ReviewAddDTO) -> None:
         pass
 
-    async def get(self, review_id: int) -> Review:
+    async def get(self, review_id: int) -> ReviewDTO:
         pass
 
-    async def get_all(self) -> list[Review]:
+    async def get_all(self) -> list[ReviewDTO]:
         pass
 
-    async def update(self, review_id: int, review: ReviewAdd) -> None:
+    async def update(self, review_id: int, review: ReviewAddDTO) -> None:
         pass
 
     async def delete(self, review_id: int) -> None:

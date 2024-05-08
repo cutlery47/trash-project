@@ -1,15 +1,18 @@
 from pydantic import BaseModel
 
-class BaseItem(BaseModel):
+from typing import Optional
+
+class BaseItemDTO(BaseModel):
     category_id: int
+    merchant_id: int
     name: str
     description: str
     price: float
     in_stock: int
-    image: str | None
+    image: Optional[str] = None
 
-class ItemAdd(BaseItem):
+class ItemAddDTO(BaseItemDTO):
     pass
 
-class Item(BaseItem):
+class ItemDTO(BaseItemDTO):
     id: int

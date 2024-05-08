@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 
-class BaseCategory(BaseModel):
+class BaseCategoryDTO(BaseModel):
     name: str
 
-class CategoryAdd(BaseCategory):
+class CategoryAddDTO(BaseCategoryDTO):
     pass
 
-class Category(BaseCategory):
+class CategoryDTO(BaseCategoryDTO):
     id: int

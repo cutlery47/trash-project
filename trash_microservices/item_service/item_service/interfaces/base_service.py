@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
 from item_service.interfaces.base_repository import BaseRepository
-from item_service.schemas.item_schema import BaseItem
-from item_service.schemas.review_schema import BaseReview
-from item_service.schemas.category_schema import BaseCategory
+from item_service.schemas.item_schema import BaseItemDTO
+from item_service.schemas.review_schema import BaseReviewDTO
+from item_service.schemas.category_schema import BaseCategoryDTO
 
-class BaseService[Entity: (BaseItem, BaseReview, BaseCategory)](ABC):
+class BaseService[Entity: (BaseItemDTO, BaseReviewDTO, BaseCategoryDTO)](ABC):
     @abstractmethod
     def __init__(self, repository: BaseRepository):
         raise NotImplementedError

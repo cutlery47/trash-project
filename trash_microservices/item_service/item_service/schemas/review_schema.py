@@ -2,15 +2,15 @@ from pydantic import BaseModel
 
 from datetime import datetime
 
-class BaseReview(BaseModel):
+class BaseReviewDTO(BaseModel):
     reviewer_id: int
     item_id: int
     text: str
     rating: float
 
-class ReviewAdd(BaseReview):
+class ReviewAddDTO(BaseReviewDTO):
     pass
 
-class Review(BaseReview):
+class ReviewDTO(BaseReviewDTO):
     id: int
     uploaded_at: datetime
