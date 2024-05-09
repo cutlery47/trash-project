@@ -1,11 +1,11 @@
 from item_service.interfaces.base_service import BaseService
 from item_service.schemas.category_schema import BaseCategoryDTO, CategoryDTO, CategoryAddDTO
-from item_service.repositories.category_repository import CategoryRepository
+from item_service.interfaces.base_repository import BaseRepository
 from item_service.repositories.models.models import Category
 
 
 class CategoryService(BaseService[BaseCategoryDTO]):
-    def __init__(self, repository: CategoryRepository) -> None:
+    def __init__(self, repository: BaseRepository) -> None:
         self.repository = repository
 
     async def create(self, category: CategoryAddDTO) -> None:

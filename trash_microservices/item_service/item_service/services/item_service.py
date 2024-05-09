@@ -1,10 +1,10 @@
 from item_service.interfaces.base_service import BaseService
 from item_service.schemas.item_schema import BaseItemDTO, ItemDTO, ItemAddDTO
 from item_service.repositories.models.models import Item
-from item_service.repositories.item_repository import ItemRepository
+from item_service.interfaces.base_repository import BaseRepository
 
 class ItemService(BaseService[BaseItemDTO]):
-    def __init__(self, repository: ItemRepository):
+    def __init__(self, repository: BaseRepository):
         self.repository = repository
 
     async def create(self, item: ItemAddDTO) -> None:
