@@ -13,17 +13,19 @@ from item_service.services.category_service import CategoryService
 
 from item_service.exceptions.controller_exceptions import AccessTokenInvalid
 
-from fastapi import Request
+from loguru import logger
 
 class Controller(BaseController):
 
     def __init__(self,
                  item_service: ItemService,
                  review_service: ReviewService,
-                 category_service: CategoryService):
+                 category_service: CategoryService,
+                 urls: dict):
         self.item_service = item_service
         self.review_service = review_service
         self.category_service = category_service
+        self.urls = urls
 
         self.router = APIRouter(prefix="/api/v1")
         self.setup_api()
@@ -32,14 +34,13 @@ class Controller(BaseController):
     # because they are called only upon initialization
     # which means that them being sync won't affect
     # application runtime
-    # Idk, maybe I'm horribly wrong for this
+    # IDK, maybe I'm horribly wrong for this
 
     def setup_api(self) -> None:
         @self.router.get("/items/")
         async def get_items(request: Request) -> list[ItemDTO]:
             self.validate_access(request.cookies)
             return await self.item_service.get_all()
-
 
         @self.router.get("/items/{item_id}")
         async def get_item(request: Request, item_id: int) -> ItemDTO:
@@ -60,7 +61,7 @@ class Controller(BaseController):
         return self.router
 
     def validate_access(self, cookies: dict):
-        r = requests.post(url='http://127.0.0.1:9876/api/v1/validate/',
-                          cookies=cookies)
+        r = requests.post(url=self.urls['validate'], cookies=cookies)
         if r.status_code != 200:
+            logger.error("Access token is invalid")
             raise AccessTokenInvalid

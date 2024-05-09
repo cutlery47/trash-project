@@ -13,6 +13,7 @@ alembic = "^1.13.1"
 fastapi = {extras = ["all"], version = "^0.110.3"}
 requests = "^2.31.0"
 uvicorn = {extras = ["standard"], version = "^0.29.0"}
+loguru = "^0.7.2"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,10 +1,13 @@
 from item_service.interfaces.base_repository import BaseRepository
 from item_service.repositories.models.models import Item
-from item_service.exceptions.repository_exceptions import ResourceNotFoundException
+from item_service.exceptions.repository_exceptions import DataNotFoundException
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
+from sqlalchemy.exc import NoResultFound
+
+from loguru import logger
 
 class ItemRepository(BaseRepository[Item]):
     def __init__(self, engine: Engine) -> None:
@@ -19,9 +22,11 @@ class ItemRepository(BaseRepository[Item]):
     # noinspection PyTypeChecker
     async def get(self, item_id: int) -> Item:
         with Session(self.engine) as session:
-            item = session.get_one(Item, item_id)
-            if item is None:
-                raise ResourceNotFoundException("Item not found")
+            try:
+                item = session.get_one(Item, item_id)
+            except NoResultFound as exc:
+                logger.error(exc.args[0])
+                raise DataNotFoundException("Item not found")
             return item
 
     async def get_all(self) -> list[Item]:

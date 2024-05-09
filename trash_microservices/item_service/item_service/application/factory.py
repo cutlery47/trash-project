@@ -16,7 +16,10 @@ from item_service.config.db_config import DBConfig
 
 from sqlalchemy.engine import create_engine
 
+from loguru import logger
+
 import json
+import sys
 
 class ApplicationFactory:
     def __init__(self,
@@ -33,8 +36,10 @@ class ApplicationFactory:
 
                  app_config_path: str,
                  db_config_path: str,
+                 urls_path: str,
                  ):
-        app_config, db_config = self.parse_configs(app_config_path, db_config_path)
+        self.setup_loggers()
+        app_config, db_config, urls = self.parse_configs(app_config_path, db_config_path, urls_path)
         alchemy_engine = create_engine(f"{db_config.driver}"
                                        f"://{db_config.username}:"
                                        f"{db_config.password}@"
@@ -46,18 +51,31 @@ class ApplicationFactory:
         review_service = review_service(review_repository(alchemy_engine))
         category_service = category_service(category_repository(alchemy_engine))
 
-        controller = controller(item_service, review_service, category_service)
+        controller = controller(item_service, review_service, category_service, urls)
         self.app = application(controller, app_config)
 
     @staticmethod
-    def parse_configs(app_config_path: str, db_config_path: str) -> tuple[AppConfig, DBConfig]:
+    def setup_loggers():
+        # file logger
+        logger.add(sink="logs/logs.json",
+                   level="ERROR",
+                   format="{time:DD/MM/YYYY/HH:mm:ss} "
+                          "|{level}| line {line} in {module}.{function}: {message}",
+                   colorize=True,
+                   serialize=True,
+                   rotation="1 MB",
+                   compression="zip")
+
+    @staticmethod
+    def parse_configs(app_config_path: str, db_config_path: str, urls_path:str) -> tuple[AppConfig, DBConfig, dict]:
         app_config_dict = json.load(open(app_config_path))
         db_config_dict = json.load(open(db_config_path))
+        urls = json.load(open(urls_path))
 
         app_config = AppConfig(**app_config_dict)
         db_config = DBConfig(**db_config_dict)
 
-        return app_config, db_config
+        return app_config, db_config, urls
 
     def create(self) -> FastAPI:
         return self.app.asgi_app()
