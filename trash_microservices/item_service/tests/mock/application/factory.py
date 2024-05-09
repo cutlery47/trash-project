@@ -11,7 +11,7 @@ from loguru import logger
 
 import json
 
-class TestApplicationFactory(BaseFactory):
+class MockApplicationFactory(BaseFactory):
     def __init__(self,
                  application: type(BaseApplication),
                  controller: type(BaseController),
