@@ -1,12 +1,13 @@
 from item_service.interfaces.base_repository import BaseRepository
 from item_service.repositories.models.models import Item
 from item_service.exceptions.repository_exceptions import (DataNotFoundException,
-                                                           InternalRepositoryException)
+                                                           InternalRepositoryException, RepositoryException)
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError
+from sqlalchemy import delete, update
 
 from loguru import logger
 
@@ -22,8 +23,8 @@ class ItemRepository(BaseRepository[Item]):
             try:
                 session.add(item)
             except SQLAlchemyError as err:
-                logger.error(err.args[0])
                 session.rollback()
+                logger.error(err.args[0])
                 raise InternalRepositoryException("Couldn't create item")
             else:
                 session.commit()
@@ -43,8 +44,31 @@ class ItemRepository(BaseRepository[Item]):
             items = list(session.execute(statement).scalars().all())
             return items
 
-    async def update(self, item_id: int, item: Item) -> Item:
-        pass
-
     async def delete(self, item_id: int):
-        pass
+        with Session(self.engine) as session:
+            try:
+                query = delete(Item).where(Item.id == item_id)
+                session.execute(query)
+            except SQLAlchemyError as exc:
+                session.rollback()
+                logger.error(exc.args[0])
+                raise RepositoryException("Couldn't delete item")
+            else:
+                session.commit()
+
+    async def update(self, item_id: int, item: Item) -> Item:
+        with Session(self.engine) as session:
+            try:
+                # TODO: figure out how to optimize this
+                query = update(Item).where(Item.id == item_id).values(name=item.name,
+                                                                      description=item.description,
+                                                                      price=item.price,
+                                                                      in_stock=item.in_stock,
+                                                                      image=item.image)
+                session.execute(query)
+            except SQLAlchemyError as exc:
+                session.rollback()
+                logger.error(exc.args[0])
+                raise RepositoryException("Couldn't update item")
+            else:
+                session.commit()

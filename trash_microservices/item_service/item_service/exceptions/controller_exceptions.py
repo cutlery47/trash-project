@@ -14,3 +14,8 @@ class AccessTokenInvalid(ControllerException):
     def __init__(self):
         self.status_code = status.HTTP_401_UNAUTHORIZED
         self.detail = "Invalid access token"
+
+class PermissionsDenied(ControllerException):
+    def __init__(self):
+        self.status_code = status.HTTP_403_FORBIDDEN
+        self.detail = "Permission denied"

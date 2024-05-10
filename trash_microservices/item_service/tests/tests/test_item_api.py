@@ -1,5 +1,4 @@
 import httpx
-
 import json
 
 from tests.tests.conftest import urls_path
@@ -8,7 +7,7 @@ from loguru import logger
 
 email = "example_123@gmail.com"
 password = "example_123_password"
-user_id = ""
+user_id = None
 headers = {"Content-Type": "application/json"}
 cookies = dict()
 urls_dict = json.load(open(urls_path))
@@ -18,10 +17,9 @@ def test_register(client):
 
     re = httpx.post(url=urls_dict["/register/"], headers=headers,
                     json={"email": email, "password": password})
-    user_id = re.text
+    user_id = int(re.text)
 
     assert re.status_code == 200
-
 
 def test_authorize(client):
     global cookies
@@ -31,7 +29,6 @@ def test_authorize(client):
     cookies = re.cookies
 
     assert re.status_code == 200
-
 
 def test_add_correct_category(client):
     category_dict = {
@@ -43,7 +40,6 @@ def test_add_correct_category(client):
 
     assert re.status_code == 200
 
-
 def test_add_incorrect_name_category(client):
     category_dict = {
         "name": 123,
@@ -53,7 +49,6 @@ def test_add_incorrect_name_category(client):
                      json=category_dict)
 
     assert re.status_code == 422
-
 
 def test_add_correct_items(client):
     item_dict_1 = {
@@ -83,6 +78,20 @@ def test_add_correct_items(client):
     assert re_1.status_code == 200
     assert re_2.status_code == 200
 
+def test_add_incorrect_item_merchant_id(client):
+    item_dict = {
+        "category_id": 1,
+        "merchant_id": 10,
+        "name": "Bogdan",
+        "description": "Bogdan Shitov himself",
+        "price": 228.1337,
+        "in_stock": 2,
+    }
+
+    re = client.post(url=urls_dict["/items/add/"], headers=headers,
+                     json=item_dict, cookies=cookies)
+
+    assert re.status_code == 403
 
 def test_add_incorrect_item_category_id(client):
     item_dict_1 = {
@@ -112,7 +121,6 @@ def test_add_incorrect_item_category_id(client):
     assert re_1.status_code == 422
     assert re_2.status_code == 422
 
-
 def test_add_incorrect_item_price(client):
     item_dict = {
         "category_id": 1,
@@ -128,7 +136,6 @@ def test_add_incorrect_item_price(client):
 
     assert re.status_code == 422
 
-
 def test_add_incorrect_item_stock(client):
     item_dict = {
         "category_id": 1,
@@ -143,7 +150,6 @@ def test_add_incorrect_item_stock(client):
                      json=item_dict, cookies=cookies)
 
     assert re.status_code == 422
-
 
 def test_get_items(client):
     re = client.get(url=urls_dict["/items/"],
@@ -167,9 +173,44 @@ def test_get_non_existing_item(client):
 
     assert re.status_code == 404
 
+def test_delete_own_item(client):
+    re = client.delete(url=urls_dict["/items/"] + "1",
+                       cookies=cookies)
+
+    assert re.status_code == 200
+
+def test_delete_non_existing_item(client):
+    re = client.delete(url=urls_dict["/items/"] + "3",
+                       cookies=cookies)
+
+    assert re.status_code == 404
+
+def test_update_existing_item(client):
+    updated_item_dict = {
+        "category_id": 1,
+        "merchant_id": user_id,
+        "name": "name",
+        "description": "brick!",
+        "price": 10.0,
+        "in_stock": 5,
+        "image": None
+    }
+
+    re_put = client.put(url=urls_dict["/items/"] + "2",
+                        headers=headers,
+                        json=updated_item_dict,
+                        cookies=cookies)
+
+    assert re_put.status_code == 200
+
+    re_get = client.get(url=urls_dict["/items/"] + "2",
+                        cookies=cookies).json()
+    re_get.pop("id")
+
+    assert updated_item_dict == re_get
 
 def test_unregister(client):
-    re = httpx.delete(url=urls_dict["/users/delete/"] + user_id,
+    re = httpx.delete(url=urls_dict["/users/delete/"] + str(user_id),
                       headers=headers, cookies=cookies)
 
     assert re.status_code == 200
