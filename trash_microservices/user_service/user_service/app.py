@@ -1,17 +1,17 @@
 from flask import Flask
 import json
 
-from auth_service.storage.repositories.repository import AuthRepository
-from auth_service.controllers.controller import AuthController
-from auth_service.services.service import AuthService
-from auth_service.router.router import Router, register_routes
+from user_service.storage.repositories.repository import AuthRepository
+from user_service.controllers.controller import AuthController
+from user_service.services.service import AuthService
+from user_service.router.router import Router, register_routes
 
-from auth_service.storage.repositories.query_builder import QueryBuilder
-from auth_service.config.database.db_config import DBConfig
-from auth_service.services.handlers import TokenHandler, EmailHandler, PasswordHandler
-from auth_service.storage.entities.serializers import UserSerializer
+from user_service.storage.repositories.query_builder import QueryBuilder
+from user_service.config.database.db_config import DBConfig
+from user_service.services.handlers import TokenHandler, EmailHandler, PasswordHandler
+from user_service.storage.entities.serializers import UserSerializer
 
-from auth_service.interfaces.factory_interface import FactoryInterface
+from user_service.interfaces.factory_interface import FactoryInterface
 
 
 class TrashFactory(FactoryInterface):
@@ -26,7 +26,7 @@ class TrashFactory(FactoryInterface):
         repository = AuthRepository(config=DBConfig(db_config), query_builder=QueryBuilder())
         service = AuthService(repository=repository, email_handler=EmailHandler(), password_handler=PasswordHandler(), token_handler=TokenHandler())
         controller = AuthController(service=service, serializer=UserSerializer())
-        router = Router("router", __name__, url_prefix="/api/v1/auth", controller=controller)
+        router = Router("router", __name__, url_prefix="/api/v1/", controller=controller)
 
         # routing
         register_routes(router)

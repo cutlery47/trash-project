@@ -1,11 +1,11 @@
 import psycopg2
 from flask import make_response, Response, request
 
-from auth_service.services.service import AuthService
-from auth_service.storage.entities.serializers import UserSerializer
+from user_service.services.service import AuthService
+from user_service.storage.entities.serializers import UserSerializer
 
-from auth_service.exceptions import service_exceptions, repository_exceptions
-from auth_service.controllers.validators import (make_response_from_exception,
+from user_service.exceptions import service_exceptions, repository_exceptions
+from user_service.controllers.validators import (make_response_from_exception,
                                                  access_required,
                                                  permissions_required,
                                                  fields_required,
@@ -22,6 +22,11 @@ class AuthController:
 
     @access_required
     def validate(self) -> Response:
+        return make_response("200", 200)
+
+    @access_required
+    @permissions_required([])
+    def validate_id(self, user_id) -> Response:
         return make_response("200", 200)
 
     def register(self) -> Response:
@@ -46,14 +51,19 @@ class AuthController:
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        return make_response(result, 200)
+        response = make_response("200", 200)
+        response.set_cookie("access", result["access"])
+        response.set_cookie("refresh", result["refresh"])
+        return response
 
     @refresh_required
     def refresh(self) -> Response:
-        refresh_token = request.json['refresh']
-        new_access_token = self.service.refresh(refresh_token)
+        refresh_token = request.cookies.get('refresh')
+        result = self.service.refresh(refresh_token)
 
-        return make_response(new_access_token, 200)
+        response = make_response("200", 200)
+        response.set_cookie("access", result["access"])
+        return response
 
     @access_required
     @permissions_required(['GET SINGLE USER DATA'])

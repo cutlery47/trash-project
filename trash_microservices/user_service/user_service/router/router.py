@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from auth_service.controllers.controller import AuthController
+from user_service.controllers.controller import AuthController
 
 
 class Router(Blueprint):
@@ -10,27 +10,32 @@ class Router(Blueprint):
 
 
 def register_routes(router: Router):
-    @router.post("/validate/")
+    @router.post("/users/validate/")
     # validates jwt access token when requesting resources
     def validate():
         return router.controller.validate()
 
-    @router.post("/register/")
+    @router.post("/users/validate/<int:user_id>")
+    # validates jwt access token and permissions
+    def validate_id(user_id):
+        return router.controller.validate_id(user_id)
+
+    @router.post("/users/register/")
     # creates a new user
     def register_user():
         return router.controller.register()
 
-    @router.post("/register_admin/")
+    @router.post("/users/register_admin/")
     # creates a new admin
     def register_admin():
         return router.controller.register_admin()
 
-    @router.post("/authorize/")
+    @router.post("/users/authorize/")
     # authenticates user and returns a pair of access + refresh tokens
     def authorize():
         return router.controller.authorize()
 
-    @router.post("/refresh/")
+    @router.post("/users/refresh/")
     # refreshes access token, if refresh token is valid
     def refresh():
         return router.controller.refresh()

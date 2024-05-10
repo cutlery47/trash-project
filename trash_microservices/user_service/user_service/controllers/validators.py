@@ -1,11 +1,11 @@
 import functools
 
 from flask import current_app, make_response, Response, request
-from auth_service.services.handlers import TokenHandler
+from user_service.services.handlers import TokenHandler
 
-from auth_service.exceptions.controller_exceptions import (RequiredFieldsNotProvidedError, PermissionsNotGrantedError,
+from user_service.exceptions.controller_exceptions import (RequiredFieldsNotProvidedError, PermissionsNotGrantedError,
                                                            ForbiddenFieldsProvidedError)
-from auth_service.exceptions.service_exceptions import TokenIsInvalid
+from user_service.exceptions.service_exceptions import TokenIsInvalid
 
 
 # authentication decorator
@@ -14,7 +14,7 @@ def access_required(func):
     def wrapper(*args, **kwargs):
         # checks that access token is present
         # if it is, checks that one is neither expired nor fake
-        access_validation_response = TokenValidator.validate_access(request.json)
+        access_validation_response = TokenValidator.validate_access(request)
         if access_validation_response is not True:
             return access_validation_response
 
@@ -28,7 +28,7 @@ def refresh_required(func):
     def wrapper(*args, **kwargs):
         # checks that refresh token is neither expired nor fake
         # basically the same as above, but for refresh tokens
-        refresh_validation_response = TokenValidator.validate_refresh(request.json)
+        refresh_validation_response = TokenValidator.validate_refresh(request)
         if refresh_validation_response is not True:
             return refresh_validation_response
 
@@ -69,12 +69,12 @@ def permissions_required(permissions: list):
 
             # if user id argument was passed -- check for access
             if id_ is not None:
-                permissions_validator_response = PermissionValidator.has_access_to_data(id_, request.json)
+                permissions_validator_response = PermissionValidator.has_access_to_data(id_)
                 if permissions_validator_response is not True:
                     return permissions_validator_response
 
             # checks if user has matching permissions
-            if permissions is not None:
+            if len(permissions) != 0:
                 permissions_validator_response = PermissionValidator.has_permissions(permissions, request.json)
                 if permissions_validator_response is not True:
                     return permissions_validator_response
@@ -121,13 +121,13 @@ class InputValidator:
 
 class TokenValidator:
     @staticmethod
-    def validate_access(json) -> bool or Response:
-        input_validator_response = InputValidator.validate_required(required_fields=['access'],
-                                                                    json=json)
-        if input_validator_response is not True:
-            return input_validator_response
+    def validate_access(_request) -> bool or Response:
+        access_token = _request.cookies.get('access')
 
-        access_token = json['access']
+        if not access_token:
+            return make_response_from_exception(
+                RequiredFieldsNotProvidedError, 400, f"Access token is required"
+            )
 
         try:
             TokenHandler().verify(access_token)
@@ -138,13 +138,13 @@ class TokenValidator:
         return True
 
     @staticmethod
-    def validate_refresh(json) -> bool or Response:
-        input_validator_response = InputValidator.validate_required(required_fields=['refresh'],
-                                                                    json=json)
-        if input_validator_response is not True:
-            return input_validator_response
+    def validate_refresh(_request) -> bool or Response:
+        refresh_token = request.cookies.get('refresh')
 
-        refresh_token = json['refresh']
+        if not refresh_token:
+            return make_response_from_exception(
+                RequiredFieldsNotProvidedError, 400, f"Refresh token is required"
+            )
 
         try:
             TokenHandler().verify(refresh_token)
@@ -157,10 +157,11 @@ class TokenValidator:
 
 class PermissionValidator:
     @staticmethod
-    def has_access_to_data(requested_id: int, json: dict):
+    def has_access_to_data(requested_id: int):
         # getting the id field from an access token payload
         # which represents the id of a REQUESTER (the guy who requested the resource)
-        requester_id = TokenHandler().decode(json["access"])["id"]
+        access = request.cookies.get('access')
+        requester_id = TokenHandler().decode(access)["id"]
 
         # checks if user request his own data
         if requester_id != requested_id:
@@ -171,9 +172,10 @@ class PermissionValidator:
         return True
 
     @staticmethod
-    def has_permissions(permissions: list, json):
+    def has_permissions(permissions: list):
         # getting permissions, stored is access token (permissions of a token bearer)
-        token_permissions = TokenHandler().decode(json["access"])["permissions"]
+        access = request.cookies.get('access')
+        token_permissions = TokenHandler().decode(access)["permissions"]
 
         for perm in permissions:
             # if user doesn't possess any of the required permissions -- throwing error

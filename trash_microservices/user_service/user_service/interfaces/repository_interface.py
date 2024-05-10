@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from auth_service.storage.entities.entities import User
+from user_service.storage.entities.entities import User
 
 
 class AuthRepositoryInterface(ABC):

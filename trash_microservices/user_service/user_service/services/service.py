@@ -1,10 +1,10 @@
 import random
 
-from auth_service.storage.entities.entities import User
-from auth_service.storage.repositories.repository import AuthRepository
-from auth_service.services.handlers import TokenHandler, PasswordHandler, EmailHandler
+from user_service.storage.entities.entities import User
+from user_service.storage.repositories.repository import AuthRepository
+from user_service.services.handlers import TokenHandler, PasswordHandler, EmailHandler
 
-from auth_service.exceptions import service_exceptions, repository_exceptions
+from user_service.exceptions import service_exceptions, repository_exceptions
 
 
 class AuthService:
@@ -40,6 +40,7 @@ class AuthService:
         permissions = self.get_user_permissions(id_)
 
         new_access_token = self.token_handler.generate_access(user.id, user.email, role, permissions)
+
         return {"access": new_access_token}
 
     def get(self, id_: int, secure: bool = True) -> User:
