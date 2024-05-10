@@ -71,5 +71,5 @@ class ApplicationFactory(BaseFactory):
 
         return app_config, db_config, urls
 
-    def create(self) -> FastAPI:
-        return self.app.asgi_app()
+    def create(self) -> BaseApplication:
+        return self.app

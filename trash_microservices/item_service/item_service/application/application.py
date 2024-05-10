@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi.applications import FastAPI, ASGIApp
+from fastapi.testclient import TestClient
 
 from item_service.interfaces.base_application import BaseApplication
 from item_service.interfaces.base_controller import BaseController
@@ -12,5 +13,8 @@ class Application(BaseApplication):
         self.controller = controller
         self.asgi.include_router(self.controller.get_api())
 
-    def asgi_app(self) -> FastAPI:
+    def asgi_app(self) -> ASGIApp:
         return self.asgi
+
+    def test_client(self) -> TestClient:
+        return TestClient(self.asgi_app())

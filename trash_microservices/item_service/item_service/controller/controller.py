@@ -61,7 +61,7 @@ class Controller(BaseController):
         return self.router
 
     def validate_access(self, cookies: dict):
-        r = requests.post(url=self.urls['validate'], cookies=cookies)
+        r = requests.post(url=self.urls['/validate/'], cookies=cookies)
         if r.status_code != 200:
             logger.error("Access token is invalid")
             raise AccessTokenInvalid

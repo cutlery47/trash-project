@@ -25,4 +25,4 @@ factory = ApplicationFactory(application=Application,
                              urls_path="item_service/config/urls.json"
                              )
 # === Entrypoint ===
-app = factory.create()
+app = factory.create().asgi_app()
