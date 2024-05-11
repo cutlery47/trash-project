@@ -1,5 +1,3 @@
-from fastapi import FastAPI
-
 from item_service.interfaces.base_application import BaseApplication
 from item_service.interfaces.base_factory import BaseFactory
 from item_service.interfaces.base_controller import BaseController
@@ -9,7 +7,7 @@ from item_service.interfaces.base_service import BaseService
 from item_service.config.app_config import AppConfig
 from item_service.config.db_config import DBConfig
 
-from sqlalchemy.engine import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from loguru import logger
 
@@ -32,14 +30,15 @@ class ApplicationFactory(BaseFactory):
                  db_config_path: str,
                  urls_path: str
                  ):
+
         self.setup_loggers()
         app_config, db_config, urls = self.parse_configs(app_config_path, db_config_path, urls_path)
-        alchemy_engine = create_engine(f"{db_config.driver}"
-                                       f"://{db_config.username}:"
-                                       f"{db_config.password}@"
-                                       f"{db_config.host}:"
-                                       f"{db_config.port}/"
-                                       f"{db_config.dbname}")
+        alchemy_engine = create_async_engine(f"{db_config.driver}"
+                                             f"://{db_config.username}:"
+                                             f"{db_config.password}@"
+                                             f"{db_config.host}:"
+                                             f"{db_config.port}/"
+                                             f"{db_config.dbname}")
 
         item_service = item_service(item_repository(alchemy_engine))
         review_service = review_service(review_repository(alchemy_engine))

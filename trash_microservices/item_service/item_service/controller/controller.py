@@ -4,8 +4,9 @@ import httpx
 
 from item_service.interfaces.base_controller import BaseController
 
-from item_service.schemas.category_schema import CategoryAddDTO
+from item_service.schemas.category_schema import CategoryAddDTO, CategoryDTO
 from item_service.schemas.item_schema import ItemAddDTO, ItemDTO
+from item_service.schemas.review_schema import ReviewAddDTO, ReviewDTO
 
 from item_service.services.item_service import ItemService
 from item_service.services.review_service import ReviewService
@@ -30,6 +31,9 @@ class Controller(BaseController):
         self.router = APIRouter(prefix="/api/v1")
         self.setup_api()
 
+    def get_api(self) -> APIRouter:
+        return self.router
+
     # Decided to make both methods below synchronous
     # because they are called only upon initialization
     # which means that them being sync won't affect
@@ -37,6 +41,7 @@ class Controller(BaseController):
     # IDK, maybe I'm horribly wrong for this
 
     def setup_api(self) -> None:
+        # ================= item api ========================
         @self.router.get("/items/")
         async def get_items(request: Request) -> list[ItemDTO]:
             await self.validate_access(request.cookies)
@@ -69,12 +74,17 @@ class Controller(BaseController):
             await self.item_service.update(item_id, item)
             return "200"
 
+        # ================= category api ========================
+
+        @self.router.get("/categories/")
+        async def get_categories(request: Request) -> list[CategoryDTO]:
+            await self.validate_access(request.cookies)
+            return await self.category_service.get_all()
+
         @self.router.post("/categories/add/")
         async def add_category(category: CategoryAddDTO) -> None:
             await self.category_service.create(category)
 
-    def get_api(self) -> APIRouter:
-        return self.router
 
     async def validate_access(self, cookies: dict):
         re = httpx.post(url=self.urls['/validate/'], cookies=cookies)

@@ -72,8 +72,3 @@ def client(apply_migrations):
     ).create()
 
     yield app.test_client()
-
-
-
-
-

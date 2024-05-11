@@ -30,6 +30,7 @@ class CategoryRepository(BaseRepository[Category]):
     async def get_all(self) -> list[Category]:
         pass
 
+
     async def update(self, category_id: int, category: Category) -> Category:
         pass
 

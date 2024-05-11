@@ -16,7 +16,8 @@ class CategoryService(BaseService[BaseCategoryDTO]):
         pass
 
     async def get_all(self) -> list[CategoryDTO]:
-        pass
+        orm_categories = await self.repository.get_all()
+        return [CategoryDTO.model_validate(orm_category, from_attributes=True) for orm_category in orm_categories]
 
     async def update(self, category_id: int, item: CategoryAddDTO) -> None:
         pass
