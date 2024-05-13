@@ -1,5 +1,6 @@
 from fastapi.applications import FastAPI, ASGIApp
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from item_service.interfaces.base_application import BaseApplication
 from item_service.interfaces.base_controller import BaseController
@@ -17,4 +18,7 @@ class Application(BaseApplication):
         return self.asgi
 
     def test_client(self) -> TestClient:
-        return TestClient(self.asgi_app())
+        return TestClient(app=self.asgi_app())
+
+    def async_test_client(self) -> AsyncClient:
+        return AsyncClient(app=self.asgi_app(), follow_redirects=True)

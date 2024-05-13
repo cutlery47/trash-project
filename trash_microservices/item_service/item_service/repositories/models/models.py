@@ -1,13 +1,14 @@
 from sqlalchemy import ForeignKey
 
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase
+from sqlalchemy.ext.asyncio import AsyncAttrs
 
 from item_service.repositories.models.annotated_types import str_256, text, pk, timestamp
 
 from typing import Optional
 
 
-class Base(DeclarativeBase):
+class Base(DeclarativeBase, AsyncAttrs):
     pass
 
 

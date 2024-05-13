@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, AsyncSession
 
 class BaseRepository[Entity](ABC):
     @abstractmethod
-    def __init__(self, engine: AsyncEngine) -> None:
+    def __init__(self, engine: AsyncEngine, sessionmaker: async_sessionmaker[AsyncSession]) -> None:
         raise NotImplementedError
 
     @abstractmethod

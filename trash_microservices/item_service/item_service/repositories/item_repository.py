@@ -3,21 +3,23 @@ from item_service.repositories.models.models import Item
 from item_service.exceptions.repository_exceptions import (DataNotFoundException,
                                                            InternalRepositoryException, RepositoryException)
 
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, async_sessionmaker
 from sqlalchemy.sql.expression import select
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 from sqlalchemy import delete, update
 
 from loguru import logger
 
+# TODO: figure out how to pass sessionmaker as a dependency
 
 # noinspection PyTypeChecker
 class ItemRepository(BaseRepository[Item]):
-    def __init__(self, engine: AsyncEngine) -> None:
+    def __init__(self, engine: AsyncEngine, sessionmaker: async_sessionmaker[AsyncSession]) -> None:
         self.engine = engine
+        self.sessionmaker = sessionmaker
 
     async def create(self, item: Item) -> None:
-        async with AsyncSession(self.engine) as session:
+        async with self.sessionmaker() as session:
             try:
                 session.add(item)
             except SQLAlchemyError as err:
@@ -28,16 +30,16 @@ class ItemRepository(BaseRepository[Item]):
                 await session.commit()
 
     async def get(self, item_id: int) -> Item:
-        async with AsyncSession(self.engine) as session:
+        async with self.sessionmaker() as session:
             try:
-                item = session.get_one(Item, item_id)
+                item = await session.get_one(Item, item_id)
             except NoResultFound as exc:
                 logger.error(exc.args[0])
                 raise DataNotFoundException("Item not found")
             return item
 
     async def get_all(self) -> list[Item]:
-        async with AsyncSession(self.engine) as session:
+        async with self.sessionmaker() as session:
             statement = select(Item)
             items = (await session.execute(statement)).scalars().all()
             return items

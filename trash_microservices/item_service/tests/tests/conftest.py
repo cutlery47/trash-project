@@ -1,3 +1,7 @@
+import asyncio
+
+from httpx import AsyncClient
+
 from item_service.application.factory import ApplicationFactory
 from item_service.application.application import Application
 from item_service.controller.controller import Controller
@@ -26,11 +30,12 @@ import pytest
 
 app_config_path = "tests/config/app_config.json"
 db_config_path = "tests/config/db_config.json"
+migration_path = "tests/config/migration_config.json"
 urls_path = "tests/config/urls.json"
 
 @pytest.fixture(scope="session")
 def create_db():
-    db_config_dict = json.load(open(db_config_path))
+    db_config_dict = json.load(open(migration_path))
     db_config = DBConfig(**db_config_dict)
     alchemy_engine = create_engine(f"{db_config.driver}"
                                    f"://{db_config.username}:"
@@ -53,7 +58,7 @@ def apply_migrations(create_db):
     command.downgrade(config, "-1")
 
 @pytest.fixture(scope="session")
-def client(apply_migrations):
+def app(apply_migrations):
     app = ApplicationFactory(
         application=Application,
         controller=Controller,
@@ -71,4 +76,8 @@ def client(apply_migrations):
         urls_path="tests/config/urls.json"
     ).create()
 
-    yield app.test_client()
+    yield app
+
+@pytest.fixture(scope="session")
+def client(app):
+    yield app.async_test_client()
