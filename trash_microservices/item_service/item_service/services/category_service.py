@@ -13,14 +13,15 @@ class CategoryService(BaseService[BaseCategoryDTO]):
         await self.repository.create(orm_category)
 
     async def get(self, category_id: int) -> CategoryDTO:
-        pass
+        orm_category = await self.repository.get(category_id)
+        return CategoryDTO.model_validate(orm_category, from_attributes=True)
 
     async def get_all(self) -> list[CategoryDTO]:
         orm_categories = await self.repository.get_all()
         return [CategoryDTO.model_validate(orm_category, from_attributes=True) for orm_category in orm_categories]
 
-    async def update(self, category_id: int, item: CategoryAddDTO) -> None:
-        pass
+    async def update(self, category_id: int, category: CategoryAddDTO) -> None:
+        await self.repository.update(category_id, category)
 
     async def delete(self, category_id: int) -> None:
-        pass
+        await self.repository.delete(category_id)

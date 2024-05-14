@@ -56,7 +56,7 @@ class ItemRepository(BaseRepository[Item]):
             else:
                 await session.commit()
 
-    async def update(self, item_id: int, item: Item) -> Item:
+    async def update(self, item_id: int, item: Item) -> None:
         async with AsyncSession(self.engine) as session:
             try:
                 # TODO: figure out how to get rid of implicit field declaration
