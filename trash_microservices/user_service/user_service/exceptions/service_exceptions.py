@@ -14,6 +14,10 @@ class TokenIsInvalid(TokenException):
     pass
 
 
+class AdminRoleRequired(TokenException):
+    pass
+
+
 class PasswordException(Exception):
     pass
 

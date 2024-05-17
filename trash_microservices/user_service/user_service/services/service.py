@@ -18,11 +18,10 @@ class AuthService:
 
     def authorize(self, email: str, password: str) -> dict:
         user = self.authenticate(email, password)
-        role = self.get_user_role(user.id)
-        permissions = self.get_user_permissions(user.id)
 
-        access_token = self.token_handler.generate_access(user.id, user.email, role, permissions)
+        access_token = self.token_handler.generate_access(user.id, user.email, user.role)
         refresh_token = self.token_handler.generate_refresh(user.id)
+
         return {"access": access_token,
                 "refresh": refresh_token}
 
@@ -36,11 +35,8 @@ class AuthService:
     def refresh(self, refresh_token: str) -> dict:
         id_ = self.token_handler.decode(refresh_token)["id"]
         user = self.get(id_)
-        role = self.get_user_role(id_)
-        permissions = self.get_user_permissions(id_)
 
-        new_access_token = self.token_handler.generate_access(user.id, user.email, role, permissions)
-
+        new_access_token = self.token_handler.generate_access(user.id, user.email, user.role)
         return {"access": new_access_token}
 
     def get(self, id_: int, secure: bool = True) -> User:
@@ -57,9 +53,9 @@ class AuthService:
         users = self.repository.get_all(secure)
         return users
 
-    def create(self, user: User, role_id: int) -> bool:
+    def create(self, user: User) -> bool:
+        print("here")
         user.id = self.randomize_id(1, 2 ** 31 - 1)
-        user.role_id = role_id
 
         # email validation + normalization
         user.email = self.email_handler.validate(user.email)
@@ -76,16 +72,10 @@ class AuthService:
     def update(self, id_, user: User) -> bool:
         return self.repository.update(id_, user)
 
-    def get_user_role(self, id_: int) -> int:
-        return self.repository.get_role(id_)
-
-    def get_user_permissions(self, id_) -> list[str]:
-        return self.repository.get_permissions(id_)
-
     def randomize_id(self, lower_bound: int, upper_bound: int) -> int:
         while True:
             id_ = random.randint(lower_bound, upper_bound)
             try:
-                self.get(id_, False)
+                self.repository.get(False, id_=id_)
             except repository_exceptions.UserNotFoundError:
                 return id_

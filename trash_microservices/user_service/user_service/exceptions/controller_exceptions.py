@@ -10,5 +10,5 @@ class ForbiddenFieldsProvidedError(ControllerError):
     pass
 
 
-class PermissionsNotGrantedError(Exception):
+class NotAllowedToAccessResource(Exception):
     pass

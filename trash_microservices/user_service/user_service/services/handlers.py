@@ -13,8 +13,8 @@ class TokenHandler:
     def __init__(self):
         self.algorithm = "HS256"
 
-    def generate_access(self, id_, email, role, permissions) -> str:
-        payload = self._generate_access_payload(id_, email, role, permissions)
+    def generate_access(self, id_, email, role) -> str:
+        payload = self._generate_access_payload(id_, email, role)
         access_token = jwt.encode(payload=payload, algorithm=self.algorithm, key=current_app.secret_key)
         return access_token
 
@@ -26,24 +26,27 @@ class TokenHandler:
     def verify(self, token):
         try:
             decoded = jwt.decode(token, algorithms=self.algorithm, key=current_app.secret_key)
-
         except jwt.PyJWTError as err:
             raise service_exceptions.TokenIsInvalid(str(err))
 
         return decoded
+
+    def verify_admin(self, token):
+        decoded = self.decode(token)
+        if decoded.get('role') != 'admin':
+            raise service_exceptions.AdminRoleRequired
 
     def decode(self, token) -> dict:
         # simply decodes all the data without any verification
         return jwt.decode(token, algorithms=self.algorithm, key=current_app.secret_key, options={"verify_signature": False})
 
     @staticmethod
-    def _generate_access_payload(id_, email, role, permissions) -> dict:
+    def _generate_access_payload(id_, email, role) -> dict:
         return {
             "id": id_,
             "email": email,
             "role": role,
-            "permissions": permissions,
-            "exp": datetime.now(tz=timezone.utc) + timedelta(hours=1),  # <- expiration time
+            "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),  # <- expiration time
             "iat": datetime.now(tz=timezone.utc)  # <- time of issuing
         }
 

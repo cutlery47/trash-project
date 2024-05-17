@@ -24,7 +24,8 @@ class TrashFactory(FactoryInterface):
         app.secret_key = open(jwt_secret_path).read()
 
         repository = AuthRepository(config=DBConfig(db_config), query_builder=QueryBuilder())
-        service = AuthService(repository=repository, email_handler=EmailHandler(), password_handler=PasswordHandler(), token_handler=TokenHandler())
+        service = AuthService(repository=repository, email_handler=EmailHandler(), password_handler=PasswordHandler(),
+                              token_handler=TokenHandler())
         controller = AuthController(service=service, serializer=UserSerializer())
         router = Router("router", __name__, url_prefix="/api/v1/", controller=controller)
 

@@ -3,87 +3,9 @@ import functools
 from flask import current_app, make_response, Response, request
 from user_service.services.handlers import TokenHandler
 
-from user_service.exceptions.controller_exceptions import (RequiredFieldsNotProvidedError, PermissionsNotGrantedError,
+from user_service.exceptions.controller_exceptions import (RequiredFieldsNotProvidedError, NotAllowedToAccessResource,
                                                            ForbiddenFieldsProvidedError)
-from user_service.exceptions.service_exceptions import TokenIsInvalid
-
-
-# authentication decorator
-def access_required(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        # checks that access token is present
-        # if it is, checks that one is neither expired nor fake
-        access_validation_response = TokenValidator.validate_access(request)
-        if access_validation_response is not True:
-            return access_validation_response
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-def refresh_required(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        # checks that refresh token is neither expired nor fake
-        # basically the same as above, but for refresh tokens
-        refresh_validation_response = TokenValidator.validate_refresh(request)
-        if refresh_validation_response is not True:
-            return refresh_validation_response
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-# fields decorator
-def fields_required(fields: list):
-    def fields_decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # checks that all required fields are present
-            input_validator_response = InputValidator.validate_required(fields, request.json)
-            if input_validator_response is not True:
-                return input_validator_response
-
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return fields_decorator
-
-
-# permissions decorator
-def permissions_required(permissions: list):
-    def permissions_decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # wrapper function receives 1 to 2 arguments:
-            # 1st argument is always the WRAPPED function
-            # 2nd argument is optional and IS USER ID
-            # if it is present => we have to check if user is allowed to manipulate data by the id
-            id_ = None
-            if len(args) > 1:
-                id_ = args[1]
-
-            # if user id argument was passed -- check for access
-            if id_ is not None:
-                permissions_validator_response = PermissionValidator.has_access_to_data(id_)
-                if permissions_validator_response is not True:
-                    return permissions_validator_response
-
-            # checks if user has matching permissions
-            if len(permissions) != 0:
-                permissions_validator_response = PermissionValidator.has_permissions(permissions, request.json)
-                if permissions_validator_response is not True:
-                    return permissions_validator_response
-
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return permissions_decorator
+from user_service.exceptions.service_exceptions import TokenIsInvalid, AdminRoleRequired
 
 
 def make_response_from_exception(err, status: int, response: str) -> Response:
@@ -102,9 +24,8 @@ class InputValidator:
             # if any of the required fields is not present -- throwing errrrrror
             if not json.get(field):
                 return make_response_from_exception(
-                    RequiredFieldsNotProvidedError, 400, f"Desired field: \"{field}\" is not provided"
+                    RequiredFieldsNotProvidedError, 422, f"Desired field: \"{field}\" is not provided"
                 )
-
         return True
 
     @staticmethod
@@ -113,75 +34,63 @@ class InputValidator:
             # if any of the forbidden fields is present -- throwing errror
             if json.get(field):
                 return make_response_from_exception(
-                    ForbiddenFieldsProvidedError, 400, f"Forbidden field: \"{field}\" is provided"
+                    ForbiddenFieldsProvidedError, 422, f"Forbidden field: \"{field}\" is provided"
                 )
-
         return True
 
 
 class TokenValidator:
     @staticmethod
-    def validate_access(_request) -> bool or Response:
-        access_token = _request.cookies.get('access')
+    def validate_access() -> bool or Response:
+        access_token = request.cookies.get('access')
 
         if not access_token:
             return make_response_from_exception(
-                RequiredFieldsNotProvidedError, 400, f"Access token is required"
+                RequiredFieldsNotProvidedError, 401, f"Access token is required"
             )
 
         try:
             TokenHandler().verify(access_token)
-
         except TokenIsInvalid as err:
             return make_response_from_exception(type(err), 403, "Access token is invalid")
-
         return True
 
     @staticmethod
-    def validate_refresh(_request) -> bool or Response:
+    def validate_admin() -> bool or Response:
+        access_token = request.cookies.get('access')
+        try:
+            TokenHandler().verify_admin(access_token)
+        except AdminRoleRequired as err:
+            return make_response_from_exception(type(err), 403, "Admin role is required")
+        return True
+
+    @staticmethod
+    def validate_refresh() -> bool or Response:
         refresh_token = request.cookies.get('refresh')
 
         if not refresh_token:
             return make_response_from_exception(
-                RequiredFieldsNotProvidedError, 400, f"Refresh token is required"
+                RequiredFieldsNotProvidedError, 401, f"Refresh token is required"
             )
 
         try:
             TokenHandler().verify(refresh_token)
-
         except TokenIsInvalid as err:
-            return make_response_from_exception(type(err), 403, "Refresh token is invalid")
-
-        return True
-
-
-class PermissionValidator:
-    @staticmethod
-    def has_access_to_data(requested_id: int):
-        # getting the id field from an access token payload
-        # which represents the id of a REQUESTER (the guy who requested the resource)
-        access = request.cookies.get('access')
-        requester_id = TokenHandler().decode(access)["id"]
-
-        # checks if user request his own data
-        if requester_id != requested_id:
-            return make_response_from_exception(
-                PermissionsNotGrantedError, 403, "You don't have access to data by specified id"
-            )
+            return make_response_from_exception(type(err), 401, "Refresh token is invalid")
 
         return True
 
     @staticmethod
-    def has_permissions(permissions: list):
-        # getting permissions, stored is access token (permissions of a token bearer)
-        access = request.cookies.get('access')
-        token_permissions = TokenHandler().decode(access)["permissions"]
+    def validate_id_access() -> bool or Response:
+        access_token = request.cookies.get('access')
+        decoded = TokenHandler().decode(access_token)
 
-        for perm in permissions:
-            # if user doesn't possess any of the required permissions -- throwing error
-            if perm not in token_permissions:
-                return make_response_from_exception(
-                    PermissionsNotGrantedError, 403, "You don't have desired permissions"
-                )
-
+        token_id = decoded.get('id')
+        requested_id = request.url.split('/')[-1]
+        print(token_id, requested_id)
+        if token_id != requested_id:
+            return make_response_from_exception(NotAllowedToAccessResource,
+                                                401, "You are not allowed to access this resource")
         return True
+
+

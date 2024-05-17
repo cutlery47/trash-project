@@ -23,11 +23,3 @@ class AuthRepositoryInterface(ABC):
     @abstractmethod
     def update(self, id_: int, user_data: User) -> bool:
         raise NotImplementedError
-
-    @abstractmethod
-    def get_role(self, id_: int) -> int:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_permissions(self, id_: int) -> int:
-        raise NotImplementedError

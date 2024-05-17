@@ -10,32 +10,47 @@ class Router(Blueprint):
 
 
 def register_routes(router: Router):
-    @router.post("/users/validate/")
+    @router.post("/validate_access/")
     # validates jwt access token when requesting resources
-    def validate():
-        return router.controller.validate()
+    def validate_access():
+        return router.controller.validate_access()
 
-    @router.post("/users/validate/<int:user_id>")
-    # validates jwt access token and permissions
-    def validate_id(user_id):
-        return router.controller.validate_id(user_id)
+    @router.post("/validate_admin/")
+    # validates that user has admin permissions
+    def validate_admin():
+        return router.controller.validate_admin()
 
-    @router.post("/users/register/")
+    @router.post("/validate_access/<int:user_id>")
+    # validates access to a particular resource
+    def validate_access_to_id(user_id):
+        return router.controller.validate_access_to_id(user_id)
+
+    @router.post("/validate_access_and_admin/")
+    # validates access token and then validates admin permissoins
+    def validate_access_and_admin():
+        return router.controller.validate_access_and_admin()
+
+    @router.post("/validate_access_and_id/<int:user_id>")
+    # validates access token and then validated access to a resource
+    def validate_access_and_id(user_id):
+        return router.controller.validate_access_and_id(user_id)
+
+    @router.post("/register/")
     # creates a new user
     def register_user():
         return router.controller.register()
 
-    @router.post("/users/register_admin/")
+    @router.post("/register_admin/")
     # creates a new admin
     def register_admin():
         return router.controller.register_admin()
 
-    @router.post("/users/authorize/")
+    @router.post("/authorize/")
     # authenticates user and returns a pair of access + refresh tokens
     def authorize():
         return router.controller.authorize()
 
-    @router.post("/users/refresh/")
+    @router.post("/refresh/")
     # refreshes access token, if refresh token is valid
     def refresh():
         return router.controller.refresh()
@@ -50,22 +65,12 @@ def register_routes(router: Router):
     def get_all_users():
         return router.controller.get_all()
 
-    @router.delete("/users/delete/<int:user_id>")
+    @router.delete("/users/<int:user_id>")
     # deletes user by specified id
     def delete_user(user_id):
         return router.controller.delete(user_id)
 
-    @router.put("/users/update/<int:user_id>")
+    @router.put("/users/<int:user_id>")
     # updates users data by their id
     def update_user(user_id):
         return router.controller.update(user_id)
-
-    @router.get("/users/role/<int:user_id>")
-    # returns users roles by their id
-    def get_user_role(user_id):
-        return router.controller.get_user_role(user_id)
-
-    @router.get("/users/permissions/<int:user_id>")
-    # returns users permissions by their id
-    def get_user_permissions(user_id):
-        return router.controller.get_user_permissions(user_id)
