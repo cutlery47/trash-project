@@ -5,12 +5,12 @@ from item_service.interfaces.base_factory import BaseFactory
 from item_service.interfaces.base_controller import BaseController
 from item_service.interfaces.base_repository import BaseRepository
 from item_service.interfaces.base_service import BaseService
+from item_service.controller.validator import RequestValidator
 
 from item_service.config.app_config import AppConfig
 from item_service.config.db_config import DBConfig
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy import StaticPool
 
 from loguru import logger
 
@@ -27,6 +27,8 @@ class ApplicationFactory(BaseFactory):
                  review_service: type(BaseService),
                  category_service: type(BaseService),
 
+                 request_validator: type(RequestValidator),
+
                  item_repository: type(BaseRepository),
                  review_repository: type(BaseRepository),
                  category_repository: type(BaseRepository),
@@ -38,16 +40,22 @@ class ApplicationFactory(BaseFactory):
 
         self.setup_loggers()
         app_config, db_config, urls = self.parse_configs(app_config_path, db_config_path, urls_path)
+
         alchemy_engine = create_async_engine(f"{db_config.driver}"f"://{db_config.username}:"
                                              f"{db_config.password}@"f"{db_config.host}:"
                                              f"{db_config.port}/"f"{db_config.dbname}")
         sessionmaker = async_sessionmaker(bind=alchemy_engine, expire_on_commit=False)
 
-        item_service = item_service(item_repository(alchemy_engine, sessionmaker))
-        review_service = review_service(review_repository(alchemy_engine, sessionmaker))
-        category_service = category_service(category_repository(alchemy_engine, sessionmaker))
+        item_service = item_service(repository=item_repository(alchemy_engine, sessionmaker))
+        review_service = review_service(repository=review_repository(alchemy_engine, sessionmaker))
+        category_service = category_service(repository=category_repository(alchemy_engine, sessionmaker))
 
-        controller = controller(item_service, review_service, category_service, urls)
+        request_validator = request_validator(urls=urls)
+        controller = controller(item_service=item_service,
+                                review_service=review_service,
+                                category_service=category_service,
+                                request_validator=request_validator)
+
         self.app = application(controller, app_config)
 
     @staticmethod

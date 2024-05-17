@@ -18,7 +18,7 @@ class Application(BaseApplication):
         return self.asgi
 
     def test_client(self) -> TestClient:
-        return TestClient(app=self.asgi_app())
+        return TestClient(app=self.asgi_app(), follow_redirects=True)
 
     def async_test_client(self) -> AsyncClient:
         return AsyncClient(app=self.asgi_app(), follow_redirects=True)

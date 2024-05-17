@@ -1,6 +1,7 @@
 from item_service.application.factory import ApplicationFactory
 from item_service.application.application import Application
 from item_service.controller.controller import Controller
+from item_service.controller.validator import RequestValidator
 from item_service.services.item_service import ItemService
 from item_service.services.review_service import ReviewService
 from item_service.services.category_service import CategoryService
@@ -69,6 +70,8 @@ def app(apply_migrations) -> Application:
         review_service=ReviewService,
         category_service=CategoryService,
 
+        request_validator=RequestValidator,
+
         item_repository=ItemRepository,
         category_repository=CategoryRepository,
         review_repository=ReviewRepository,
@@ -97,7 +100,7 @@ def cookies(app) -> Cookies:
     yield cookies
 
     # cleanup
-    httpx.delete(url=urls_dict['/users/delete/'] + user_id, headers=headers)
+    httpx.delete(url=urls_dict['/users/'] + user_id, headers=headers)
 
 
 

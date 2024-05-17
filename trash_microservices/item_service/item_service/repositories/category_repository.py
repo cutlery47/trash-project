@@ -8,6 +8,8 @@ from sqlalchemy import select, update, delete
 
 from loguru import logger
 
+
+# noinspection PyTypeChecker
 class CategoryRepository(BaseRepository[Category]):
     def __init__(self, engine: AsyncEngine, sessionmaker: async_sessionmaker[AsyncSession]):
         self.engine = engine
@@ -51,7 +53,9 @@ class CategoryRepository(BaseRepository[Category]):
         async with self.sessionmaker() as session:
             try:
                 query = update(Category).where(Category.id == category_id).values(name=category.name)
-                await session.execute(query)
+                res = await session.execute(query)
+                if res.rowcount == 0:
+                    raise DataNotFoundException("Category not found")
             except SQLAlchemyError as err:
                 await session.rollback()
                 logger.error(err.args[0])
@@ -63,7 +67,9 @@ class CategoryRepository(BaseRepository[Category]):
         async with self.sessionmaker() as session:
             try:
                 query = delete(Category).where(Category.id == category_id)
-                await session.execute(query)
+                res = await session.execute(query)
+                if res.rowcount == 0:
+                    raise DataNotFoundException("Category not found")
             except SQLAlchemyError as err:
                 await session.rollback()
                 logger.error(err.args[0])

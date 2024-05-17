@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from item_service.controller.validator import RequestValidator
 from item_service.interfaces.base_application import BaseApplication
 from item_service.interfaces.base_controller import BaseController
 from item_service.interfaces.base_service import BaseService
@@ -18,6 +19,8 @@ class BaseFactory(ABC):
                  item_service: type(BaseService),
                  review_service: type(BaseService),
                  category_service: type(BaseService),
+
+                 request_validator: type(RequestValidator),
 
                  item_repository: type(BaseRepository),
                  review_repository: type(BaseRepository),

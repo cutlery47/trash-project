@@ -9,7 +9,7 @@ class CategoryService(BaseService[BaseCategoryDTO]):
         self.repository = repository
 
     async def create(self, category: CategoryAddDTO) -> None:
-        orm_category = Category(**category.dict())
+        orm_category = Category(**category.model_dump())
         await self.repository.create(orm_category)
 
     async def get(self, category_id: int) -> CategoryDTO:
