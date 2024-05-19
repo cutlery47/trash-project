@@ -5,7 +5,7 @@ from item_service.repositories.models.models import Category
 
 
 class CategoryService(BaseService[BaseCategoryDTO]):
-    def __init__(self, repository: BaseRepository) -> None:
+    def __init__(self, repository: BaseRepository[Category]) -> None:
         self.repository = repository
 
     async def create(self, category: CategoryAddDTO) -> None:
@@ -21,7 +21,8 @@ class CategoryService(BaseService[BaseCategoryDTO]):
         return [CategoryDTO.model_validate(orm_category, from_attributes=True) for orm_category in orm_categories]
 
     async def update(self, category_id: int, category: CategoryAddDTO) -> None:
-        await self.repository.update(category_id, category)
+        orm_category = Category(**category.model_dump())
+        await self.repository.update(category_id, orm_category)
 
     async def delete(self, category_id: int) -> None:
         await self.repository.delete(category_id)

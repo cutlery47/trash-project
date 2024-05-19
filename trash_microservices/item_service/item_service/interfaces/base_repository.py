@@ -17,7 +17,7 @@ class BaseRepository[Entity](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get(self, entity_id: int) -> Entity:
+    async def get(self, **filters) -> Entity:
         """
         Retrieves an entity from the repositories.
         :param entity_id:
@@ -44,7 +44,7 @@ class BaseRepository[Entity](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete(self, entity_id: int) -> None:
+    async def delete(self, **filters) -> None:
         """
         Deletes an entity from the repositories.
         :param entity_id:

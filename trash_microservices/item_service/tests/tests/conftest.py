@@ -52,7 +52,7 @@ def create_db():
     yield
     drop_database(alchemy_engine.url)
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def apply_migrations(create_db):
     config = Config(Path.cwd() / "tests" / "alembic.ini")
 
@@ -60,7 +60,7 @@ def apply_migrations(create_db):
     yield
     command.downgrade(config, "-1")
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def app(apply_migrations) -> Application:
     app = ApplicationFactory(
         application=Application,
@@ -80,30 +80,24 @@ def app(apply_migrations) -> Application:
         db_config_path="tests/config/db_config.json",
         urls_path="tests/config/urls.json"
     ).create()
-
     yield app
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def client(app) -> AsyncClient:
-    return app.async_test_client()
+    yield app.async_test_client()
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
+def user_id(app) -> int:
+    re = httpx.post(url=urls_dict['/register/'],
+                    headers=headers,
+                    json={"email": email, "password": password})
+    yield int(re.text)
+    httpx.delete(url=urls_dict['/users/'] + re.text, headers=headers)
+
+@pytest.fixture(scope="module")
 def cookies(app) -> Cookies:
-    re = httpx.post(url=urls_dict['/register/'], headers=headers,
+    re = httpx.post(url=urls_dict['/authorize/'],
+                    headers=headers,
                     json={"email": email, "password": password})
-    user_id = re.text
-
-    re = httpx.post(url=urls_dict['/authorize/'], headers=headers,
-                    json={"email": email, "password": password})
-    cookies = re.cookies
-
-    yield cookies
-
-    # cleanup
-    httpx.delete(url=urls_dict['/users/'] + user_id, headers=headers)
-
-
-
-
-
+    yield re.cookies
 

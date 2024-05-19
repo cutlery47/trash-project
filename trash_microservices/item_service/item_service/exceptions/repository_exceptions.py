@@ -4,16 +4,11 @@ class RepositoryException(HTTPException):
     pass
 
 class DataNotFoundException(RepositoryException):
-    def __init__(self, detail):
+    def __init__(self):
         self.status_code = 404
-        self.detail = detail
-
-class CreateNewRecordException(RepositoryException):
-    def __init__(self, detail):
-        self.status_code = 500
-        self.detail = detail
+        self.detail = "Requested data was not found"
 
 class InternalRepositoryException(RepositoryException):
-    def __init__(self, detail):
+    def __init__(self):
         self.status_code = 500
-        self.detail = detail
+        self.detail = "An error occurred when processing your request"

@@ -6,7 +6,7 @@ from item_service.interfaces.base_repository import BaseRepository
 from loguru import logger
 
 class ItemService(BaseService[BaseItemDTO]):
-    def __init__(self, repository: BaseRepository):
+    def __init__(self, repository: BaseRepository[Item]):
         self.repository = repository
 
     async def create(self, item: ItemAddDTO) -> None:
