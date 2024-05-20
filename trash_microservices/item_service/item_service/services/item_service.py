@@ -3,10 +3,15 @@ from item_service.schemas.item_schema import BaseItemDTO, ItemDTO, ItemAddDTO
 from item_service.repositories.models.models import Item
 from item_service.interfaces.base_repository import BaseRepository
 
+from fastapi import Depends
+
+from typing import Annotated
+
 from loguru import logger
 
 class ItemService(BaseService[BaseItemDTO]):
-    def __init__(self, repository: BaseRepository[Item]):
+    def __init__(self,
+                 repository: Annotated[BaseRepository[Item], Depends(get_crud_repository, use_cache=False)]):
         self.repository = repository
 
     async def create(self, item: ItemAddDTO) -> None:

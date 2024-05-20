@@ -8,15 +8,20 @@ from item_service.schemas.category_schema import CategoryAddDTO, CategoryDTO
 from item_service.schemas.item_schema import ItemAddDTO, ItemDTO
 from item_service.schemas.review_schema import ReviewAddDTO, ReviewDTO
 
+from fastapi import Depends
+
+from typing import Annotated
+
 from loguru import logger
 
 class Controller(BaseController):
 
     def __init__(self,
-                 item_service: BaseService,
-                 review_service: BaseReviewService,
-                 category_service: BaseService,
-                 request_validator: RequestValidator):
+                 item_service: Annotated[BaseService, Depends(get_service, use_cache=False)],
+                 review_service: Annotated[BaseService, Depends(get_service, use_cache=False)],
+                 category_service: Annotated[BaseService, Depends(get_service, use_cache=False)],
+                 request_validator: Annotated[RequestValidator, Depends(get_request_validator)]
+                 ):
         self.item_service = item_service
         self.review_service = review_service
         self.category_service = category_service
@@ -29,6 +34,7 @@ class Controller(BaseController):
         return self.router
 
     def setup_api(self) -> None:
+
         # ================= item api ========================
 
         @self.router.get("/items/")

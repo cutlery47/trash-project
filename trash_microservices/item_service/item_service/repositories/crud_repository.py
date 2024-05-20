@@ -8,12 +8,16 @@ from item_service.interfaces.base_repository import BaseRepository
 from item_service.repositories.models.models import Base
 from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
 
+from fastapi import Depends
+
+from typing import Annotated
 
 class CRUDRepository[Entity: Base](BaseRepository):
     def __init__(self,
-                 engine: AsyncEngine,
-                 sessionmaker: async_sessionmaker[AsyncSession],
-                 exc_handler: RepositoryExceptionHandler):
+                 engine: Annotated[AsyncEngine, Depends(get_engine)],
+                 sessionmaker: Annotated[type(AsyncSession), Depends(get_sessionmaker)],
+                 exc_handler: Annotated[RepositoryExceptionHandler, Depends(get_repo_excpetion_handler)]
+                 ):
         self.engine = engine
         self.sessionmaker = sessionmaker
         self.exc_handler = exc_handler

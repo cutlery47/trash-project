@@ -5,14 +5,6 @@ from item_service.interfaces.base_service import BaseService
 from fastapi.routing import APIRouter
 
 class BaseController(ABC):
-    @abstractmethod
-    def __init__(self,
-                 item_service: BaseService,
-                 review_service: BaseService,
-                 category_service: BaseService,
-                 urls: dict
-                 ) -> None:
-        raise NotImplementedError
 
     # each of these two functions execute exactly once.
     # this made me assume that I CAN afford to make them sync.

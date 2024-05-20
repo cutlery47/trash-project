@@ -1,6 +1,10 @@
 from fastapi.applications import FastAPI, ASGIApp
 from fastapi.testclient import TestClient
+from fastapi import Depends
+
 from httpx import AsyncClient
+
+from typing import Annotated
 
 from item_service.interfaces.base_application import BaseApplication
 from item_service.interfaces.base_controller import BaseController
@@ -9,7 +13,10 @@ from item_service.config.app_config import AppConfig
 from dataclasses import asdict
 
 class Application(BaseApplication):
-    def __init__(self, controller: BaseController, config: AppConfig) -> None:
+    def __init__(self,
+                 controller: Annotated[BaseController, Depends(get_contoller)],
+                 config: Annotated[AppConfig, Depends(get_app_config)]
+                 ):
         self.asgi = FastAPI(**asdict(config))
         self.controller = controller
         self.asgi.include_router(self.controller.get_api())

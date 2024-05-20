@@ -6,9 +6,6 @@ from item_service.schemas.review_schema import BaseReviewDTO, ReviewDTO
 from item_service.schemas.category_schema import BaseCategoryDTO
 
 class BaseService[Entity: (BaseItemDTO, BaseReviewDTO, BaseCategoryDTO)](ABC):
-    @abstractmethod
-    def __init__(self, repository: BaseRepository):
-        raise NotImplementedError
 
     @abstractmethod
     async def create(self, entity: Entity) -> None:

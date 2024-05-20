@@ -11,26 +11,6 @@ from item_service.config.db_config import DBConfig
 
 
 class BaseFactory(ABC):
-    @abstractmethod
-    def __init__(self,
-                 application: type(BaseApplication),
-                 controller: type(BaseController),
-
-                 item_service: type(BaseService),
-                 review_service: type(BaseService),
-                 category_service: type(BaseService),
-
-                 request_validator: type(RequestValidator),
-
-                 item_repository: type(BaseRepository),
-                 review_repository: type(BaseRepository),
-                 category_repository: type(BaseRepository),
-
-                 app_config_path: str,
-                 db_config_path: str,
-                 urls_path: str
-                 ):
-        raise NotImplementedError
 
     @staticmethod
     @abstractmethod

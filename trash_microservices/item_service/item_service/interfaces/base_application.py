@@ -11,9 +11,6 @@ from httpx import AsyncClient
 # I fell like this one is redundant
 # Might delete later
 class BaseApplication(ABC):
-    @abstractmethod
-    def __init__(self, controller: BaseController, config: dict) -> None:
-        raise NotImplementedError
 
     @abstractmethod
     def asgi_app(self) -> ASGIApp:

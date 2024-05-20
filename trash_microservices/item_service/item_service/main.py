@@ -4,10 +4,12 @@ from item_service.services.item_service import ItemService
 from item_service.services.review_service import ReviewService
 from item_service.services.category_service import CategoryService
 from item_service.repositories.crud_repository import CRUDRepository
-from item_service.repositories.review_repository import ReviewRepository
 from item_service.controller.validator import RequestValidator
+from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
 
-from item_service.repositories.models.models import Item, Category
+from fastapi import Depends
+
+from item_service.repositories.models.models import Item, Category, Review
 
 from item_service.application.factory import ApplicationFactory
 
@@ -21,8 +23,10 @@ factory = ApplicationFactory(application=Application,
                              request_validator=RequestValidator,
 
                              item_repository=CRUDRepository[Item],
-                             review_repository=ReviewRepository,
-                             category_repository=CRUDRepository[Item],
+                             review_repository=CRUDRepository[Review],
+                             category_repository=CRUDRepository[Category],
+
+                             exc_handler
 
                              db_config_path="item_service/config/db_config.json",
                              app_config_path="item_service/config/app_config.json",

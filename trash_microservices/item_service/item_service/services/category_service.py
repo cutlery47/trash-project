@@ -3,9 +3,14 @@ from item_service.schemas.category_schema import BaseCategoryDTO, CategoryDTO, C
 from item_service.interfaces.base_repository import BaseRepository
 from item_service.repositories.models.models import Category
 
+from typing import Annotated
+
+from fastapi import Depends
+
 
 class CategoryService(BaseService[BaseCategoryDTO]):
-    def __init__(self, repository: BaseRepository[Category]) -> None:
+    def __init__(self,
+                 repository: Annotated[BaseRepository[Category], Depends(get_crud_repository, use_cache=False)]):
         self.repository = repository
 
     async def create(self, category: CategoryAddDTO) -> None:
@@ -17,7 +22,7 @@ class CategoryService(BaseService[BaseCategoryDTO]):
         return CategoryDTO.model_validate(orm_category, from_attributes=True)
 
     async def get_all(self) -> list[CategoryDTO]:
-        orm_categories = await self.repository.get_all()
+        orm_categories = await self.repository.get()
         return [CategoryDTO.model_validate(orm_category, from_attributes=True) for orm_category in orm_categories]
 
     async def update(self, category_id: int, category: CategoryAddDTO) -> None:

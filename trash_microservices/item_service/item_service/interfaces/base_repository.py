@@ -3,9 +3,6 @@ from abc import ABC, abstractmethod
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, AsyncSession
 
 class BaseRepository[Entity](ABC):
-    @abstractmethod
-    def __init__(self, engine: AsyncEngine, sessionmaker: async_sessionmaker[AsyncSession]) -> None:
-        raise NotImplementedError
 
     @abstractmethod
     async def create(self, entity: Entity) -> None:
@@ -17,18 +14,10 @@ class BaseRepository[Entity](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get(self, **filters) -> Entity:
+    async def get(self, **filters) -> list[Entity]:
         """
         Retrieves an entity from the repositories.
         :param entity_id:
-        :return:
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    async def get_all(self) -> list[Entity]:
-        """
-        Retrieves all entities from the repositories.
         :return:
         """
         raise NotImplementedError
