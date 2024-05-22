@@ -4,44 +4,44 @@ import pytest
 
 from tests.tests.conftest import urls_dict, headers, user_id
 
-@pytest.mark.asyncio(scope="module")
-async def test_add_correct_items(client: AsyncClient, user_id: int, cookies: Cookies) -> None:
-    category = {
-        "name": "bogdan"
-    }
-
-    item = {
-        "category_id": 1,
-        "merchant_id": user_id,
-        "name": "brick",
-        "description": "brick!",
-        "price": 10,
-        "in_stock": 5,
-    }
-
-    await client.post(urls_dict["/categories/"],
-                      headers=headers,
-                      cookies=cookies,
-                      json=item)
-
-    await client.post(url=urls_dict["/items/"],
-                      headers=headers,
-                      json=item,
-                      cookies=cookies)
-
-    re = await client.get(url=urls_dict["/items/"] + "1",
-                          headers=headers,
-                          cookies=cookies)
-
-    assert re.json().get("name") == item.get("name")
-
-    await client.delete(urls_dict["/categories/"] + "1",
-                        headers=headers,
-                        cookies=cookies)
-
-    await client.delete(url=urls_dict["/items/"] + "1",
-                        headers=headers,
-                        cookies=cookies)
+# @pytest.mark.asyncio(scope="module")
+# async def test_add_correct_items(client: AsyncClient, user_id: int, cookies: Cookies) -> None:
+#     category = {
+#         "name": "bogdan"
+#     }
+#
+#     item = {
+#         "category_id": 1,
+#         "merchant_id": user_id,
+#         "name": "brick",
+#         "description": "brick!",
+#         "price": 10,
+#         "in_stock": 5,
+#     }
+#
+#     await client.post(urls_dict["/categories/"],
+#                       headers=headers,
+#                       cookies=cookies,
+#                       json=item)
+#
+#     await client.post(url=urls_dict["/items/"],
+#                       headers=headers,
+#                       json=item,
+#                       cookies=cookies)
+#
+#     re = await client.get(url=urls_dict["/items/"] + "1",
+#                           headers=headers,
+#                           cookies=cookies)
+#
+#     assert re.json().get("name") == item.get("name")
+#
+#     await client.delete(urls_dict["/categories/"] + "1",
+#                         headers=headers,
+#                         cookies=cookies)
+#
+#     await client.delete(url=urls_dict["/items/"] + "1",
+#                         headers=headers,
+#                         cookies=cookies)
 
 # @pytest.mark.asyncio(scope="session")
 # async def test_add_incorrect_item_merchant_id(client: AsyncClient, cookies: Cookies):

@@ -1,13 +1,18 @@
 from item_service.application.factory import ApplicationFactory
 from item_service.application.application import Application
+
 from item_service.controller.controller import Controller
 from item_service.controller.validator import RequestValidator
+
 from item_service.services.services.item_service import ItemService
 from item_service.services.services.review_service import ReviewService
 from item_service.services.services.category_service import CategoryService
-from item_service.repositories.item_repository import ItemRepository
-from item_service.repositories.review_repository import ReviewRepository
-from item_service.repositories.category_repository import CategoryRepository
+
+from item_service.repositories.repositories.item_repository import ItemRepository
+from item_service.repositories.repositories.review_repository import ReviewRepository
+from item_service.repositories.repositories.category_repository import CategoryRepository
+from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
+
 from item_service.config.db_config import DBConfig
 
 from httpx import AsyncClient, Cookies
@@ -50,7 +55,7 @@ def create_db():
     yield
     drop_database(alchemy_engine.url)
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def apply_migrations(create_db):
     config = Config(Path.cwd() / "tests" / "alembic.ini")
 
@@ -74,6 +79,8 @@ def app(apply_migrations) -> Application:
         category_repository=CategoryRepository,
         review_repository=ReviewRepository,
 
+        repository_exc_handler=RepositoryExceptionHandler,
+
         app_config_path="tests/config/app_config.json",
         db_config_path="tests/config/db_config.json",
         urls_path="tests/config/urls.json"
@@ -89,8 +96,7 @@ def user_id(app) -> int:
     re = httpx.post(url=urls_dict['/register/'],
                     headers=headers,
                     json={"email": email, "password": password})
-    yield int(re.text)
-    httpx.delete(url=urls_dict['/users/'] + re.text, headers=headers)
+    return int(re.text)
 
 @pytest.fixture(scope="module")
 def cookies(app) -> Cookies:
@@ -98,4 +104,7 @@ def cookies(app) -> Cookies:
                     headers=headers,
                     json={"email": email, "password": password})
     yield re.cookies
+    httpx.delete(url=urls_dict['/users/'] + re.text,
+                 cookies=re.cookies,
+                 headers=headers)
 
