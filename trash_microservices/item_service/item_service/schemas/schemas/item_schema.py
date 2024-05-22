@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 from typing import Optional
 
-from item_service.schemas.annotated_types import PositiveFloat, PositiveInteger
+from item_service.schemas.types.annotated_types import PositiveFloat, PositiveInteger
 
 class BaseItemDTO(BaseModel):
     category_id: PositiveInteger

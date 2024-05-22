@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from item_service.schemas.annotated_types import PositiveInteger
+from item_service.schemas.types.annotated_types import PositiveInteger
 
 class BaseCategoryDTO(BaseModel):
     name: str

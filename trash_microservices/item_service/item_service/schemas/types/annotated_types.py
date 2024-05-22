@@ -2,7 +2,7 @@ from typing import Any, Annotated
 
 from pydantic import AfterValidator
 
-from item_service.exceptions.schema_exceptions import FieldValidationException
+from item_service.schemas.exceptions.exceptions import FieldValidationException
 
 from loguru import logger
 

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 from datetime import datetime
 
-from item_service.schemas.annotated_types import PositiveInteger, PositiveFloat
+from item_service.schemas.types.annotated_types import PositiveInteger, PositiveFloat
 
 class BaseReviewDTO(BaseModel):
     reviewer_id: PositiveInteger

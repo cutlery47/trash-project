@@ -8,16 +8,12 @@ from item_service.interfaces.base_repository import BaseRepository
 from item_service.repositories.models.models import Base
 from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
 
-from fastapi import Depends
-
-from typing import Annotated
 
 class CRUDRepository[Entity: Base](BaseRepository):
     def __init__(self,
-                 engine: Annotated[AsyncEngine, Depends(get_engine)],
-                 sessionmaker: Annotated[type(AsyncSession), Depends(get_sessionmaker)],
-                 exc_handler: Annotated[RepositoryExceptionHandler, Depends(get_repo_excpetion_handler)]
-                 ):
+                 engine: AsyncEngine,
+                 sessionmaker: async_sessionmaker[AsyncSession],
+                 exc_handler: RepositoryExceptionHandler):
         self.engine = engine
         self.sessionmaker = sessionmaker
         self.exc_handler = exc_handler
@@ -32,10 +28,10 @@ class CRUDRepository[Entity: Base](BaseRepository):
             else:
                 await session.commit()
 
-    async def get(self, **filters) -> list[Entity]:
+    async def get(self, *filters) -> list[Entity]:
         async with self.sessionmaker() as session:
             try:
-                query = select(Entity).where(**filters)
+                query = select(Entity).where(*filters)
                 future = await session.execute(query)
             except (NoResultFound, SQLAlchemyError) as exc:
                 self.exc_handler.handle(exc)
@@ -43,10 +39,10 @@ class CRUDRepository[Entity: Base](BaseRepository):
                 data = list(future.scalars().all())
                 return data
 
-    async def delete(self, **filters) -> None:
+    async def delete(self, *filters) -> None:
         async with self.sessionmaker() as session:
             try:
-                query = delete(Entity).where(**filters)
+                query = delete(Entity).where(*filters)
                 await session.execute(query)
             except SQLAlchemyError as exc:
                 await session.rollback()
@@ -54,10 +50,10 @@ class CRUDRepository[Entity: Base](BaseRepository):
             else:
                 await session.commit()
 
-    async def update(self, entity: Entity, **filters) -> None:
+    async def update(self, entity: Entity, *filters) -> None:
         async with self.sessionmaker() as session:
             try:
-                query = update(Entity).where(**filters)
+                query = update(Entity).where(*filters)
                 await session.execute(query)
             except SQLAlchemyError as exc:
                 await session.rollback()

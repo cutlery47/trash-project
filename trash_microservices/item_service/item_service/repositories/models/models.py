@@ -9,13 +9,12 @@ from typing import Optional
 
 
 class Base(DeclarativeBase, AsyncAttrs):
-    pass
+    id: Mapped[pk]
 
 
 class Item(Base):
     __tablename__ = "items"
 
-    id: Mapped[pk]
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
     merchant_id: Mapped[int]
     name: Mapped[str_256]
@@ -28,14 +27,12 @@ class Item(Base):
 class Category(Base):
     __tablename__ = "categories"
 
-    id: Mapped[pk]
     name: Mapped[str_256]
 
 
 class Review(Base):
     __tablename__ = "reviews"
 
-    id: Mapped[pk]
     reviewer_id: Mapped[int]  # also a foreign key (to a table in another database)
     item_id: Mapped[int] = mapped_column(ForeignKey("items.id"))
     text: Mapped[Optional[text]]

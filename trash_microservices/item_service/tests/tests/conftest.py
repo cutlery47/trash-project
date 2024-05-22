@@ -2,9 +2,9 @@ from item_service.application.factory import ApplicationFactory
 from item_service.application.application import Application
 from item_service.controller.controller import Controller
 from item_service.controller.validator import RequestValidator
-from item_service.services.item_service import ItemService
-from item_service.services.review_service import ReviewService
-from item_service.services.category_service import CategoryService
+from item_service.services.services.item_service import ItemService
+from item_service.services.services.review_service import ReviewService
+from item_service.services.services.category_service import CategoryService
 from item_service.repositories.item_repository import ItemRepository
 from item_service.repositories.review_repository import ReviewRepository
 from item_service.repositories.category_repository import CategoryRepository
@@ -19,8 +19,6 @@ from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database, drop_database
-
-from loguru import logger
 
 import json
 import httpx
