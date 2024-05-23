@@ -55,164 +55,45 @@ async def test_delete_nonexistent_category(client: AsyncClient, cookies: Cookies
 
     assert re.status_code == 404
 
-# @pytest.mark.asyncio(scope="module")
-# async def test_update_category(client: AsyncClient, cookies: Cookies):
-#     client.cookies = cookies
-#     client.headers = headers
-#
-#     category = {"name": "buggin"}
-#     new_category = {"name": "slaccin"}
-#
-#     await client.post(url=urls_dict["/categories/"], json=category)
-#
-#     await client.put(url=urls_dict["/categories/"] + "3", json=new_category)
-#
-#     re = await client.get(url=urls_dict["/categories/"] + "3")
-#
-#     assert re.json().get("name") == new_category.get("name")
-#
-#     await client.delete(url=urls_dict["/categories/"] + "3")
-#
-# @pytest.mark.asyncio(scope="module")
-# async def test_update_category_incorrect_name(client: AsyncClient, cookies: Cookies):
-#     category = {
-#         "name": "buggin"
-#     }
-#
-#     new_category = {
-#         "name": 123123
-#     }
-#
-#     await client.post(url=urls_dict["/categories/"],
-#                       headers=headers,
-#                       json=category,
-#                       cookies=cookies)
-#
-#     re = await client.put(url=urls_dict["/categories/"] + "4",
-#                           headers=headers,
-#                           json=new_category,
-#                           cookies=cookies)
-#
-#     assert re.status_code == 422
-#
-#     await client.delete(url=urls_dict["/categories/"] + "4",
-#                         headers=headers,
-#                         cookies=cookies)
-#
-# @pytest.mark.asyncio(scope="module")
-# async def test_update_nonexistent_category(client: AsyncClient, cookies: Cookies):
-#     category = {
-#         "name": "buggin"
-#     }
-#
-#     re = await client.put(url=urls_dict["/categories/"] + "228",
-#                           headers=headers,
-#                           json=category,
-#                           cookies=cookies)
-#
-#     assert re.status_code == 404
-# async def test_add_incorrect_category_name(client: AsyncClient, cookies: Cookies):
-#     category = {
-#         "name": 123123,
-#     }
-#
-#     re = await client.post(url=urls_dict["/categories/"],
-#                            headers=headers,
-#                            json=category,
-#                            cookies=cookies)
-#
-#     assert re.status_code == 422
-#
-# @pytest.mark.asyncio(scope="module")
-# async def test_delete_existing_category(client: AsyncClient, cookies: Cookies):
-#     category = {
-#         "name": "bogdan"
-#     }
-#
-#     re = await client.post(url=urls_dict["/categories/"],
-#                            headers=headers,
-#                            json=category,
-#                            cookies=cookies)
-#
-#     re = await client.delete(url=urls_dict["/categories/"] + "2",
-#                              headers=headers,
-#                              cookies=cookies)
-#
-#     assert re.status_code == 200
-#
-# @pytest.mark.asyncio(scope="module")
-# async def test_delete_nonexistent_category(client: AsyncClient, cookies: Cookies):
-#     re = await client.delete(url=urls_dict["/categories/"] + "1",
-#                              headers=headers,
-#                              cookies=cookies)
-#
-#     assert re.status_code == 404
-#
-# @pytest.mark.asyncio(scope="module")
-# async def test_update_category(client: AsyncClient, cookies: Cookies):
-#     category = {
-#         "name": "buggin"
-#     }
-#
-#     new_category = {
-#         "name": "slaccin"
-#     }
-#
-#     await client.post(url=urls_dict["/categories/"],
-#                       headers=headers,
-#                       json=category,
-#                       cookies=cookies)
-#
-#     await client.put(url=urls_dict["/categories/"] + "3",
-#                      headers=headers,
-#                      json=new_category,
-#                      cookies=cookies)
-#
-#     re = await client.get(url=urls_dict["/categories/"] + "3",
-#                           headers=headers,
-#                           cookies=cookies)
-#
-#     assert re.json().get("name") == new_category.get("name")
-#
-#     await client.delete(url=urls_dict["/categories/"] + "3",
-#                         headers=headers,
-#                         cookies=cookies)
-#
-# @pytest.mark.asyncio(scope="module")
-# async def test_update_category_incorrect_name(client: AsyncClient, cookies: Cookies):
-#     category = {
-#         "name": "buggin"
-#     }
-#
-#     new_category = {
-#         "name": 123123
-#     }
-#
-#     await client.post(url=urls_dict["/categories/"],
-#                       headers=headers,
-#                       json=category,
-#                       cookies=cookies)
-#
-#     re = await client.put(url=urls_dict["/categories/"] + "4",
-#                           headers=headers,
-#                           json=new_category,
-#                           cookies=cookies)
-#
-#     assert re.status_code == 422
-#
-#     await client.delete(url=urls_dict["/categories/"] + "4",
-#                         headers=headers,
-#                         cookies=cookies)
-#
-# @pytest.mark.asyncio(scope="module")
-# async def test_update_nonexistent_category(client: AsyncClient, cookies: Cookies):
-#     category = {
-#         "name": "buggin"
-#     }
-#
-#     re = await client.put(url=urls_dict["/categories/"] + "228",
-#                           headers=headers,
-#                           json=category,
-#                           cookies=cookies)
-#
-#     assert re.status_code == 404
+@pytest.mark.asyncio(scope="module")
+async def test_update_category(client: AsyncClient, cookies: Cookies):
+    client.cookies = cookies
+    client.headers = headers
+
+    category = {"name": "buggin"}
+    new_category = {"name": "slaccin"}
+
+    await client.post(url=urls_dict["/categories/"], json=category)
+    await client.put(url=urls_dict["/categories/"] + "3", json=new_category)
+    re = await client.get(url=urls_dict["/categories/"] + "3")
+
+    assert re.json()[0].get("name") == new_category.get("name")
+
+    await client.delete(url=urls_dict["/categories/"] + "3")
+
+@pytest.mark.asyncio(scope="module")
+async def test_update_category_incorrect_name(client: AsyncClient, cookies: Cookies):
+    client.cookies = cookies
+    client.headers = headers
+
+    category = {"name": "buggin"}
+    new_category = {"name": 123123}
+
+    await client.post(url=urls_dict["/categories/"], json=category)
+    re = await client.put(url=urls_dict["/categories/"] + "4", json=new_category)
+
+    assert re.status_code == 422
+
+    await client.delete(url=urls_dict["/categories/"] + "4")
+
+@pytest.mark.asyncio(scope="module")
+async def test_update_nonexistent_category(client: AsyncClient, cookies: Cookies):
+    client.cookies = cookies
+    client.headers = headers
+
+    category = {"name": "buggin"}
+
+    re = await client.put(url=urls_dict["/categories/"] + "228", json=category)
+
+    assert re.status_code == 404
+
