@@ -22,6 +22,8 @@ from alembic import command
 
 from pathlib import Path
 
+from loguru import logger
+
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database, drop_database
 

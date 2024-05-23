@@ -6,7 +6,7 @@ from tests.tests.manager import RequestManager
 from item_service.repositories.models.models import Category
 
 @pytest.mark.asyncio(scope="module")
-async def test_add_correct_category(client: AsyncClient, cookies: Cookies):
+async def test_add_correct_category(client: AsyncClient, user_id, cookies):
     client.cookies = cookies
     client.headers = headers
 
@@ -17,12 +17,12 @@ async def test_add_correct_category(client: AsyncClient, cookies: Cookies):
     await manager.add(category)
     added_categories = await manager.get_all_serialized()
 
-    assert added_categories[0].get("name") == category.get("name")
+    assert added_categories[0]["name"] == category["name"]
 
-    await manager.delete(added_categories[0].get('id'))
+    await manager.delete(added_categories[0]['id'])
 
 @pytest.mark.asyncio(scope="module")
-async def test_add_incorrect_category_name(client: AsyncClient, cookies: Cookies):
+async def test_add_incorrect_category_name(client: AsyncClient, user_id, cookies):
     client.cookies = cookies
     client.headers = headers
 
@@ -34,7 +34,7 @@ async def test_add_incorrect_category_name(client: AsyncClient, cookies: Cookies
     assert response.status_code == 422
 
 @pytest.mark.asyncio(scope="module")
-async def test_delete_existing_category(client: AsyncClient, cookies: Cookies):
+async def test_delete_existing_category(client: AsyncClient, user_id, cookies: Cookies):
     client.cookies = cookies
     client.headers = headers
 
@@ -53,7 +53,7 @@ async def test_delete_existing_category(client: AsyncClient, cookies: Cookies):
     assert len(response.json()) == 0
 
 @pytest.mark.asyncio(scope="module")
-async def test_delete_nonexistent_category(client: AsyncClient, cookies: Cookies):
+async def test_delete_nonexistent_category(client: AsyncClient, user_id, cookies):
     client.cookies = cookies
     client.headers = headers
 
@@ -63,7 +63,7 @@ async def test_delete_nonexistent_category(client: AsyncClient, cookies: Cookies
     assert response.status_code == 404
 
 @pytest.mark.asyncio(scope="module")
-async def test_update_category(client: AsyncClient, cookies: Cookies):
+async def test_update_category(client: AsyncClient, user_id, cookies):
     client.cookies = cookies
     client.headers = headers
 
@@ -85,7 +85,7 @@ async def test_update_category(client: AsyncClient, cookies: Cookies):
     await manager.delete(id_)
 
 @pytest.mark.asyncio(scope="module")
-async def test_update_category_incorrect_name(client: AsyncClient, cookies: Cookies):
+async def test_update_category_incorrect_name(client: AsyncClient, user_id, cookies):
     client.cookies = cookies
     client.headers = headers
 
@@ -106,7 +106,7 @@ async def test_update_category_incorrect_name(client: AsyncClient, cookies: Cook
     await manager.delete(id_)
 
 @pytest.mark.asyncio(scope="module")
-async def test_update_nonexistent_category(client: AsyncClient, cookies: Cookies):
+async def test_update_nonexistent_category(client: AsyncClient, user_id, cookies):
     client.cookies = cookies
     client.headers = headers
 

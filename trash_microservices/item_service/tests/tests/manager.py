@@ -1,6 +1,8 @@
 from tests.tests.conftest import urls_dict
 from httpx import AsyncClient, Response
 
+from loguru import logger
+
 from item_service.repositories.models.models import Base, Category, Review, Item
 
 class RequestManager:
