@@ -3,63 +3,70 @@ from loguru import logger
 import pytest
 
 from tests.tests.conftest import urls_dict, headers, user_id
+from tests.tests.manager import RequestManager
 
-# @pytest.mark.asyncio(scope="module")
-# async def test_add_correct_items(client: AsyncClient, user_id: int, cookies: Cookies) -> None:
-#     category = {
-#         "name": "bogdan"
-#     }
-#
-#     item = {
-#         "category_id": 1,
-#         "merchant_id": user_id,
-#         "name": "brick",
-#         "description": "brick!",
-#         "price": 10,
-#         "in_stock": 5,
-#     }
-#
-#     await client.post(urls_dict["/categories/"],
-#                       headers=headers,
-#                       cookies=cookies,
-#                       json=item)
-#
-#     await client.post(url=urls_dict["/items/"],
-#                       headers=headers,
-#                       json=item,
-#                       cookies=cookies)
-#
-#     re = await client.get(url=urls_dict["/items/"] + "1",
-#                           headers=headers,
-#                           cookies=cookies)
-#
-#     assert re.json().get("name") == item.get("name")
-#
-#     await client.delete(urls_dict["/categories/"] + "1",
-#                         headers=headers,
-#                         cookies=cookies)
-#
-#     await client.delete(url=urls_dict["/items/"] + "1",
-#                         headers=headers,
-#                         cookies=cookies)
+from item_service.repositories.models.models import Item, Category
 
-# @pytest.mark.asyncio(scope="session")
-# async def test_add_incorrect_item_merchant_id(client: AsyncClient, cookies: Cookies):
-#     item_dict = {
-#         "category_id": 1,
-#         "merchant_id": 10,
-#         "name": "Bogdan",
-#         "description": "Bogdan Shitov himself",
-#         "price": 228.1337,
-#         "in_stock": 2,
-#     }
-#
-#     re = await client.post(url=urls_dict["/items/add/"],
-#                            headers=headers,
-#                            json=item_dict,
-#                            cookies=cookies)
-#
-#     assert re.status_code == 403
+@pytest.mark.asyncio(scope="module")
+async def test_add_correct_item(client: AsyncClient, user_id: int, cookies: Cookies) -> None:
+    client.cookies = cookies
+    client.headers = headers
+
+    category_manager = RequestManager(client, Category)
+    item_manager = RequestManager(client, Item)
+
+    category = {"name": "bogdan"}
+
+    item = {
+        "merchant_id": user_id,
+        "name": "brick",
+        "description": "brick!",
+        "price": 10,
+        "in_stock": 5,
+    }
+
+    await category_manager.add(category)
+
+    get_category = await client.get(urls_dict["/categories/"])
+    category_id = get_category.json()[0]['id']
+    item['category_id'] = category_id
+
+    await item_manager.add(item)
+    added_items = await item_manager.get_all_serialized()
+    item_id = added_items[0]['id']
+
+    assert added_items[0]["name"] == item['name']
+
+    await category_manager.delete(category_id)
+    await item_manager.delete(item_id)
+
+@pytest.mark.asyncio(scope="module")
+async def test_add_incorrect_item_merchant_id(client: AsyncClient, cookies: Cookies):
+    client.cookies = cookies
+    client.headers = headers
+
+    category_manager = RequestManager(client, Category)
+    item_manager = RequestManager(client, Item)
+
+    category = {"name": "bogdan"}
+
+    item = {
+        "merchant_id": 10,
+        "name": "Bogdan",
+        "description": "Bogdan Shitov himself",
+        "price": 228.1337,
+        "in_stock": 2,
+    }
+
+    await category_manager.add(category)
+    added_categories = await category_manager.get_all_serialized()
+
+    category_id = added_categories[0].get('id')
+    item['category_id'] = category_id
+
+    response = await item_manager.add(item)
+
+    assert response.status_code != 200
 #
 # @pytest.mark.asyncio(scope="session")
 # async def test_add_incorrect_item_category_id(client):
