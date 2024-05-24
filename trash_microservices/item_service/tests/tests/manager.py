@@ -21,8 +21,8 @@ class RequestManager:
         return response
 
     async def get_serialized(self, id_: int) -> dict:
-        category = await self.get(id_)
-        return category.json()[0]
+        data = await self.get(id_)
+        return data.json()[0]
 
     async def get_all(self) -> Response:
         response = await self.client.get(url=self.url)
