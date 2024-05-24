@@ -1,6 +1,8 @@
 from fastapi.exceptions import HTTPException
 from starlette import status
 
+from loguru import logger
+
 class RepositoryException(HTTPException):
     pass
 

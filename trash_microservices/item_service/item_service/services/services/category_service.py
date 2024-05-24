@@ -5,3 +5,5 @@ from item_service.repositories.models.models import Category
 
 class CategoryService(CRUDService[CategoryAddDTO, CategoryDTO]):
     _entity_class = Category
+    _dto_class = CategoryDTO
+    _add_dto_class = CategoryAddDTO

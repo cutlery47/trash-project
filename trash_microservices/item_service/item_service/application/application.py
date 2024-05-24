@@ -1,8 +1,7 @@
 from fastapi.applications import FastAPI, ASGIApp
 from fastapi.testclient import TestClient
-from fastapi import Depends
 
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 from item_service.interfaces.base_application import BaseApplication
 from item_service.interfaces.base_controller import BaseController
@@ -23,4 +22,4 @@ class Application(BaseApplication):
         return TestClient(app=self.asgi_app(), follow_redirects=True)
 
     def async_test_client(self) -> AsyncClient:
-        return AsyncClient(app=self.asgi_app(), follow_redirects=True)
+        return AsyncClient(transport=ASGITransport(app=self.asgi_app()), follow_redirects=True)

@@ -21,12 +21,11 @@ class ApplicationFactory(BaseFactory):
     def __init__(self,
                  application: type(BaseApplication),
                  controller: type(BaseController),
+                 request_validator: type(RequestValidator),
 
                  item_service: type(BaseService),
                  review_service: type(BaseService),
                  category_service: type(BaseService),
-
-                 request_validator: type(RequestValidator),
 
                  item_repository: type(BaseRepository),
                  review_repository: type(BaseRepository),

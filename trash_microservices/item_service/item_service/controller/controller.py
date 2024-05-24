@@ -28,15 +28,16 @@ class Controller(BaseController):
         return self.router
 
     def setup_api(self) -> None:
+
         # ================= item api ========================
 
         @self.router.get("/items/")
         async def get_items(request: Request) -> list[ItemDTO]:
             await self.validator.validate_access(cookies=request.cookies)
-            return await self.item_service.get_all()
+            return await self.item_service.get()
 
         @self.router.get("/items/{item_id}")
-        async def get_item(request: Request, item_id: int) -> ItemDTO:
+        async def get_item(request: Request, item_id: int) -> list[ItemDTO]:
             await self.validator.validate_access(cookies=request.cookies)
             return await self.item_service.get(item_id)
 
@@ -49,7 +50,7 @@ class Controller(BaseController):
         @self.router.delete("/items/{item_id}")
         async def delete_item(request: Request, item_id: int) -> int:
             item = await self.item_service.get(item_id)
-            await self.validator.validate_access_and_id(cookies=request.cookies, user_id=item.merchant_id)
+            await self.validator.validate_access_and_id(cookies=request.cookies, user_id=item[0].merchant_id)
             await self.item_service.delete(item_id)
             return 200
 
@@ -64,10 +65,10 @@ class Controller(BaseController):
         @self.router.get("/categories/")
         async def get_categories(request: Request) -> list[CategoryDTO]:
             await self.validator.validate_access(cookies=request.cookies)
-            return await self.category_service.get_all()
+            return await self.category_service.get()
 
         @self.router.get("/categories/{category_id}")
-        async def get_category(request: Request, category_id: int) -> CategoryDTO:
+        async def get_category(request: Request, category_id: int) -> list[CategoryDTO]:
             await self.validator.validate_access(cookies=request.cookies)
             return await self.category_service.get(category_id)
 
@@ -91,34 +92,36 @@ class Controller(BaseController):
 
         # ================= review api ========================
 
-        @self.router.get("/reviews/")
-        async def get_reviews(request: Request) -> list[ReviewDTO]:
-            await self.validator.validate_access(cookies=request.cookies)
-            reviews = await self.review_service.get_all()
-            return reviews
-
-        @self.router.get("/reviews/{review_id}")
-        async def get_review(request: Request, review_id: int) -> ReviewDTO:
-            await self.validator.validate_access(cookies=request.cookies)
-            review = await self.review_service.get(review_id)
-            return review
-
-        @self.router.get("/reviews/{item_id}")
-        async def get_item_reviews(request: Request, item_id: int) -> list[ReviewDTO]:
-            await self.validator.validate_access(cookies=request.cookies)
-            reviews = await self.review_service.get_all_for_item(item_id)
-            return reviews
-
         @self.router.post("/reviews/")
         async def add_review(request: Request, review: ReviewAddDTO) -> int:
             await self.validator.validate_access_and_id(cookies=request.cookies, user_id=review.reviewer_id)
             await self.review_service.create(review)
             return 200
 
+        @self.router.get("/reviews/")
+        async def get_reviews(request: Request) -> list[ReviewDTO]:
+            await self.validator.validate_access(cookies=request.cookies)
+            return await self.review_service.get()
+
+        @self.router.get("/reviews/{review_id}")
+        async def get_review(request: Request, review_id: int) -> list[ReviewDTO]:
+            await self.validator.validate_access(cookies=request.cookies)
+            return await self.review_service.get(review_id)
+
+        @self.router.get("/reviews/items/{item_id}")
+        async def get_item_reviews(request: Request, item_id: int) -> list[ReviewDTO]:
+            await self.validator.validate_access(cookies=request.cookies)
+            return await self.review_service.get_by_item_id(item_id)
+
+        @self.router.get("/reviews/users/{user_id}")
+        async def get_user_reviews(request: Request, user_id: int) -> list[ReviewDTO]:
+            await self.validator.validate_access(cookies=request.cookies)
+            return await self.review_service.get_by_user_id(user_id)
+
         @self.router.delete("/reviews/{review_id}")
         async def delete_review(request: Request, review_id: int) -> int:
             review = await self.review_service.get(review_id)
-            await self.validator.validate_access_and_id(cookies=request.cookies, user_id=review.reviewer_id)
+            await self.validator.validate_access_and_id(cookies=request.cookies, user_id=review[0].reviewer_id)
             await self.review_service.delete(review_id)
             return 200
 

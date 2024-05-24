@@ -44,7 +44,7 @@ class BaseService[DTO: BaseModel](ABC):
 class BaseReviewService(BaseService):
 
     @abstractmethod
-    async def get_all_for_item(self, item_id: int) -> list[ReviewDTO]:
+    async def get_by_item_id(self, item_id: int) -> list[ReviewDTO]:
         """
         Carries out business logic to get all the Reviews for a specific item
         :param item_id:
@@ -53,7 +53,7 @@ class BaseReviewService(BaseService):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_all_for_user(self, user_id: int) -> list[ReviewDTO]:
+    async def get_by_user_id(self, user_id: int) -> list[ReviewDTO]:
         """
         Carries out business logic to get all the Reviews for a specific user
         :param user_id:

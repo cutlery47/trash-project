@@ -1,4 +1,4 @@
-from item_service.exceptions.repository_exceptions import InternalRepositoryException, DataNotFoundException
+from item_service.repositories.exceptions import InternalRepositoryException, DataNotFoundException
 
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
@@ -12,5 +12,9 @@ class RepositoryExceptionHandler:
 
     @classmethod
     def handle(cls, exception: SQLAlchemyError):
-        logger.error(exception.args[0])
-        raise cls._exception_mapping[type(exception)]()
+        logger.error(f'{type(exception)} raised {exception.args[0]}')
+        mapped_exc = cls._exception_mapping.get(type(exception), None)
+        if mapped_exc is not None:
+            raise mapped_exc()
+        else:
+            raise InternalRepositoryException()

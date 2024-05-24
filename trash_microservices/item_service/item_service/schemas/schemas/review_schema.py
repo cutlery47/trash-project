@@ -15,4 +15,4 @@ class ReviewAddDTO(BaseReviewDTO):
 
 class ReviewDTO(BaseReviewDTO):
     id: PositiveInteger
-    uploaded_at: datetime
+    reviewed_at: datetime
