@@ -3,7 +3,7 @@ from httpx import AsyncClient, Response
 
 from loguru import logger
 
-from item_service.repositories.models.models import Base, Category, Review, Item
+from item_service.models.models import Base, Review, Category, Item
 
 class RequestManager:
 

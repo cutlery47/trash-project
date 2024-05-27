@@ -1,8 +1,12 @@
+import sys
+
+print(sys.path)
+
 from item_service.application.factory import ApplicationFactory
 from item_service.application.application import Application
 
 from item_service.controller.controller import Controller
-from item_service.controller.validator import RequestValidator
+from item_service.controller.handlers.validator import RequestValidator
 
 from item_service.services.services.item_service import ItemService
 from item_service.services.services.review_service import ReviewService
@@ -22,8 +26,6 @@ from alembic import command
 
 from pathlib import Path
 
-from loguru import logger
-
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
@@ -31,10 +33,10 @@ import json
 import httpx
 import pytest
 
-app_config_path = "tests/config/app_config.json"
-db_config_path = "tests/config/db_config.json"
-migration_path = "tests/config/migration_config.json"
-urls_path = "tests/config/urls.json"
+app_config_path = "123/config/app_config.json"
+db_config_path = "123/config/db_config.json"
+migration_path = "123/config/migration_config.json"
+urls_path = "123/config/urls.json"
 
 email = "example_123@gmail.com"
 password = "example_123_password"
@@ -59,7 +61,7 @@ def create_db():
 
 @pytest.fixture(scope="session")
 def apply_migrations(create_db):
-    config = Config(Path.cwd() / "tests" / "alembic.ini")
+    config = Config(Path.cwd() / "123" / "alembic.ini")
 
     command.upgrade(config, "head")
     yield
@@ -83,9 +85,9 @@ def app(apply_migrations) -> Application:
 
         repository_exc_handler=RepositoryExceptionHandler,
 
-        app_config_path="tests/config/app_config.json",
-        db_config_path="tests/config/db_config.json",
-        urls_path="tests/config/urls.json"
+        app_config_path="123/config/app_config.json",
+        db_config_path="123/config/db_config.json",
+        urls_path="123/config/urls.json"
     ).create()
     yield app
 
