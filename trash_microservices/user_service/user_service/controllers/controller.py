@@ -61,7 +61,7 @@ class AuthController:
         except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
             return make_response_from_exception(err, 500, "Unexpected error happened on the server")
 
-        response = make_response("200", 200)
+        response = make_response(str(result["id"]), 200)
         response.set_cookie("access", result["access"])
         response.set_cookie("refresh", result["refresh"])
         return response

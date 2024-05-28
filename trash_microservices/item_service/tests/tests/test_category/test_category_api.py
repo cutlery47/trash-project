@@ -3,7 +3,7 @@ import pytest
 
 from tests.tests.conftest import headers
 from tests.tests.manager import RequestManager
-from item_service.repositories.models.models import Category
+from item_service.models.models import Category
 
 @pytest.mark.asyncio(scope="module")
 async def test_add_correct_category(client: AsyncClient, user_id, cookies):

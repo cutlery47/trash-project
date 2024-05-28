@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from item_service.interfaces.base_controller import BaseController
-
 from fastapi.applications import FastAPI, ASGIApp
 from fastapi.testclient import TestClient
 
@@ -24,7 +22,7 @@ class BaseApplication(ABC):
     @abstractmethod
     def test_client(self) -> TestClient:
         """
-        Returns a test client for testing purposes
+        Returns a tests client for testing purposes
         :return: TestClient instance
         """
         raise NotImplementedError
@@ -32,7 +30,7 @@ class BaseApplication(ABC):
     @abstractmethod
     def async_test_client(self) -> AsyncClient:
         """
-        Returns an async test client for testing purposes
+        Returns an async tests client for testing purposes
         :return: AsyncClient instance
         """
         raise NotImplementedError

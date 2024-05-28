@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from item_service.repositories.models.models import Base, Item, Category, Review
+from item_service.models.models import Base, Item, Category, Review
 
 config = context.config
 

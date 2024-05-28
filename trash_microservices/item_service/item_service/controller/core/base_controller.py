@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from item_service.interfaces.base_service import BaseService
+from item_service.services.core.base_service import BaseService
 
 from fastapi.routing import APIRouter
 

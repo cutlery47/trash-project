@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "user-service"
+name = "item-service"
 version = "0.1.0"
 description = ""
 authors = ["Arkhip McNutt <ortiz47@mail.ru>"]
@@ -20,6 +20,7 @@ sqlalchemy-utils = "^0.41.2"
 asyncpg = "^0.29.0"
 psycopg2-binary = "^2.9.9"
 pytest-asyncio = "^0.23.6"
+redis = "^5.0.4"
 
 [build-system]
 requires = ["poetry-core"]

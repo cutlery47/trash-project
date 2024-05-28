@@ -26,7 +26,7 @@ def register_routes(router: Router):
         return router.controller.validate_access_to_id(user_id)
 
     @router.post("/validate_access_and_admin/")
-    # validates access token and then validates admin permissoins
+    # validates access token and then validates admin permissions
     def validate_access_and_admin():
         return router.controller.validate_access_and_admin()
 

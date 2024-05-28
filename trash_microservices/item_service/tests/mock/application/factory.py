@@ -4,8 +4,8 @@ from item_service.interfaces.base_controller import BaseController
 from item_service.interfaces.base_service import BaseService
 from item_service.interfaces.base_repository import BaseRepository
 
-from item_service.config.app_config import AppConfig
-from item_service.config.db_config import DBConfig
+from item_service.config.app.app_config import AppConfig
+from item_service.config.database.db_config import DBConfig
 
 from loguru import logger
 

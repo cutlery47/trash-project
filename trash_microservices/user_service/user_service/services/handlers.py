@@ -26,6 +26,7 @@ class TokenHandler:
     def verify(self, token):
         try:
             decoded = jwt.decode(token, algorithms=self.algorithm, key=current_app.secret_key)
+            print(f"token: {decoded}")
         except jwt.PyJWTError as err:
             raise service_exceptions.TokenIsInvalid(str(err))
 

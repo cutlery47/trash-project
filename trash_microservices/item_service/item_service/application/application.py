@@ -3,9 +3,9 @@ from fastapi.testclient import TestClient
 
 from httpx import AsyncClient, ASGITransport
 
-from item_service.interfaces.base_application import BaseApplication
-from item_service.interfaces.base_controller import BaseController
-from item_service.config.app_config import AppConfig
+from item_service.application.core.base_application import BaseApplication
+from item_service.controller.core.base_controller import BaseController
+from item_service.config.app.app_config import AppConfig
 
 from dataclasses import asdict
 

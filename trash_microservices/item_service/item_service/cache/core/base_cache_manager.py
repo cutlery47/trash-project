@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-from item_service.item_service.models.models import Base
+from item_service.models.models import Base
+
+from typing import Optional
 
 class BaseCacheManager(ABC):
 
     @abstractmethod
-    async def get(self, entity_class: str, entity_id: int) -> Base | None:
+    async def get(self, entity_class: str, entity_id: Optional[int] = None) -> Base | None:
         """
         returns data, stored in cache, if any
         :param entity_class:

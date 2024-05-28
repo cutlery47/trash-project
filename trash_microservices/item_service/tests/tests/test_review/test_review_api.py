@@ -2,7 +2,7 @@ from httpx import AsyncClient, Cookies
 from loguru import logger
 import pytest
 
-from item_service.repositories.models.models import Item, Review, Category
+from item_service.models.models import Item, Review, Category
 from tests.tests.test_review.manager import ReviewRequestManager
 from tests.tests.conftest import headers
 from tests.tests.test_review.setup_teardown import setup, teardown

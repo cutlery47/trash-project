@@ -1,4 +1,4 @@
-from item_service.repositories.models.models import Base
+from item_service.models.models import Base
 
 def entity_to_dict(entity: Base):
     result_dict = entity.__dict__

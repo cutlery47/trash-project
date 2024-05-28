@@ -1,7 +1,7 @@
 from httpx import AsyncClient, Cookies
 from loguru import logger
 
-from item_service.repositories.models.models import Item, Review, Category
+from item_service.models.models import Item, Review, Category
 from tests.tests.manager import RequestManager
 
 async def setup(client: AsyncClient, user_id: int) -> (int, int):

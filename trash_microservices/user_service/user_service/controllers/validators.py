@@ -85,9 +85,9 @@ class TokenValidator:
         access_token = request.cookies.get('access')
         decoded = TokenHandler().decode(access_token)
 
-        token_id = decoded.get('id')
+        token_id = str(decoded.get('id'))
         requested_id = request.url.split('/')[-1]
-        print(token_id, requested_id)
+
         if token_id != requested_id:
             return make_response_from_exception(NotAllowedToAccessResource,
                                                 401, "You are not allowed to access this resource")

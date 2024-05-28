@@ -23,10 +23,12 @@ class AuthService:
         refresh_token = self.token_handler.generate_refresh(user.id)
 
         return {"access": access_token,
-                "refresh": refresh_token}
+                "refresh": refresh_token,
+                "id": user.id}
 
     def authenticate(self, email, password) -> User:
         user = self.get_by_email(email, secure=False)
+        print(f"authent: {user.id}")
         if user.password != self.password_handler.hash(password):
             raise (service_exceptions.
                    PasswordDoesNotMatchError("Password doesnt match the stored one"))
@@ -54,8 +56,8 @@ class AuthService:
         return users
 
     def create(self, user: User) -> bool:
-        print("here")
         user.id = self.randomize_id(1, 2 ** 31 - 1)
+        print(f"creation: {user.id}")
 
         # email validation + normalization
         user.email = self.email_handler.validate(user.email)

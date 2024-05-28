@@ -1,13 +1,9 @@
 from abc import ABC, abstractmethod
 
-from item_service.controller.validator import RequestValidator
-from item_service.interfaces.base_application import BaseApplication
-from item_service.interfaces.base_controller import BaseController
-from item_service.interfaces.base_service import BaseService
-from item_service.interfaces.base_repository import BaseRepository
+from item_service.application.core.base_application import BaseApplication
 
-from item_service.config.app_config import AppConfig
-from item_service.config.db_config import DBConfig
+from item_service.config.app.app_config import AppConfig
+from item_service.config.database.db_config import DBConfig
 
 
 class BaseFactory(ABC):
@@ -23,7 +19,10 @@ class BaseFactory(ABC):
 
     @staticmethod
     @abstractmethod
-    def parse_configs(app_config_path: str, db_config_path: str, urls_path: str) -> tuple[AppConfig, DBConfig, dict]:
+    def parse_configs(app_config_path: str,
+                      db_config_path: str,
+                      cache_config_path: str,
+                      urls_path: str) -> tuple[AppConfig, DBConfig, dict]:
         """
         Handles JSON configs and returns config dataclasses
         :return: tuple[AppConfig, DBConfig, dict]

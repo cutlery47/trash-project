@@ -5,7 +5,7 @@ import pytest
 from tests.tests.conftest import headers
 from tests.tests.manager import RequestManager
 
-from item_service.repositories.models.models import Item, Category
+from item_service.models.models import Item, Category
 
 @pytest.mark.asyncio(scope="module")
 async def test_add_correct_item(client: AsyncClient, user_id, cookies: Cookies) -> None:

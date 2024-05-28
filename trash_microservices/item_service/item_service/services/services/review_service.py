@@ -1,7 +1,7 @@
 from item_service.services.core.crud_service import CRUDService
 from item_service.schemas.schemas.review_schema import ReviewAddDTO, ReviewDTO
-from item_service.repositories.models.models import Review
-from item_service.interfaces.base_service import BaseReviewService
+from item_service.models.models import Review
+from item_service.services.core.base_service import BaseReviewService
 
 
 class ReviewService(CRUDService[ReviewAddDTO, ReviewDTO], BaseReviewService):

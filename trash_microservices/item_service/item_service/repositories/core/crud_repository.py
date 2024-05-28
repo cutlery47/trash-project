@@ -6,8 +6,8 @@ from sqlalchemy import select, update, delete
 
 from loguru import logger
 
-from item_service.interfaces.base_repository import BaseRepository
-from item_service.repositories.models.models import Base
+from item_service.repositories.core.base_repository import BaseRepository
+from item_service.models.models import Base
 from item_service.repositories.exceptions import DataNotFoundException
 from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
 from item_service.repositories.handlers.utils import entity_to_dict

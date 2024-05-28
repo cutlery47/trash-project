@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request
 
-from item_service.controller.validator import RequestValidator
-from item_service.interfaces.base_controller import BaseController
-from item_service.interfaces.base_service import BaseService, BaseReviewService
+from item_service.controller.handlers.validator import RequestValidator
+from item_service.controller.core.base_controller import BaseController
+from item_service.services.core.base_service import BaseService, BaseReviewService
 
 from item_service.schemas.schemas.category_schema import CategoryAddDTO, CategoryDTO
 from item_service.schemas.schemas.item_schema import ItemAddDTO, ItemDTO
