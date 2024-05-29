@@ -13,31 +13,31 @@ from item_service.repositories.repositories.review_repository import ReviewRepos
 from item_service.repositories.repositories.category_repository import CategoryRepository
 from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
 
-from item_service.cache.redis_client import RedisCacheManager
+from item_service.cache.redis_client_factory import RedisClientFactory
 
-from redis import Redis
+from redis.asyncio.connection import ConnectionPool
 
-factory = ApplicationFactory(application=Application,
-                             controller=Controller,
+factory = ApplicationFactory(application_class=Application,
+                             controller_class=Controller,
 
-                             item_service=ItemService,
-                             review_service=ReviewService,
-                             category_service=CategoryService,
+                             item_service_class=ItemService,
+                             review_service_class=ReviewService,
+                             category_service_class=CategoryService,
 
-                             request_validator=RequestValidator,
+                             request_validator_class=RequestValidator,
 
-                             item_repository=ItemRepository,
-                             review_repository=ReviewRepository,
-                             category_repository=CategoryRepository,
+                             item_repository_class=ItemRepository,
+                             review_repository_class=ReviewRepository,
+                             category_repository_class=CategoryRepository,
 
-                             repository_exc_handler=RepositoryExceptionHandler,
+                             repository_exc_handler_class=RepositoryExceptionHandler,
 
                              db_config_path="item_service/config/database/db_config.json",
                              app_config_path="item_service/config/app/app_config.json",
                              urls_path="item_service/config/app/urls.json",
 
-                             cache_manager=RedisCacheManager,
-                             cache_backend=Redis,
+                             cache_client_factory_class=RedisClientFactory,
+                             cache_connection_pool_class=ConnectionPool,
                              cache_config_path="item_service/config/cache/cache_config.json"
                              )
 # === Entrypoint ===

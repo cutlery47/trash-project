@@ -5,7 +5,6 @@ from item_service.controller.core.base_controller import BaseController
 from item_service.controller.handlers.validator import RequestValidator
 
 from item_service.services.core.base_service import BaseService
-from item_service.cache.core.base_cache_client import BaseCacheManager
 
 from item_service.repositories.core.base_repository import BaseRepository
 from item_service.repositories.core.base_exception_handler import BaseExceptionHandler
@@ -14,40 +13,47 @@ from item_service.config.app.app_config import AppConfig
 from item_service.config.database.db_config import DBConfig
 from item_service.config.cache.cache_config import CacheConfig
 
-from aioredis import ConnectionPool
+from item_service.cache.core.base_cache_client_factory import BaseCacheClientFactory
 
-from typing import Optional
+from typing import Optional, Any
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from loguru import logger
 
+from dataclasses import asdict
+
+from redis.asyncio.connection import ConnectionPool
+
 import json
 
+
 # TODO: create a logger for successful operations only
+# TODO: figure out how to enable type hints here
 
 class ApplicationFactory(BaseFactory):
     def __init__(self,
-                 application: type(BaseApplication),
+                 application_class: type(BaseApplication),
 
-                 controller: type(BaseController),
-                 request_validator: type(RequestValidator),
+                 controller_class: type(BaseController),
+                 request_validator_class: type(RequestValidator),
 
-                 item_service: type(BaseService),
-                 review_service: type(BaseService),
-                 category_service: type(BaseService),
+                 item_service_class: type(BaseService),
+                 review_service_class: type(BaseService),
+                 category_service_class: type(BaseService),
 
-                 item_repository: type(BaseRepository),
-                 review_repository: type(BaseRepository),
-                 category_repository: type(BaseRepository),
-                 repository_exc_handler: type(BaseExceptionHandler),
+                 item_repository_class: type(BaseRepository),
+                 review_repository_class: type(BaseRepository),
+                 category_repository_class: type(BaseRepository),
+                 repository_exc_handler_class: type(BaseExceptionHandler),
 
                  app_config_path: str,
                  db_config_path: str,
                  urls_path: str,
 
-                 cache_config_path: Optional[str] = None
-                 cache_client_factory:
+                 cache_config_path: Optional[str] = None,
+                 cache_client_factory_class: Optional[type(BaseCacheClientFactory)] = None,
+                 cache_connection_pool_class: Optional[type(ConnectionPool) | Any] = None
                  ):
 
         self.setup_loggers()
@@ -65,34 +71,42 @@ class ApplicationFactory(BaseFactory):
 
         # passing the single instance of handler to each repo
         # may cause some drawbacks which I can't think of currently
-        repository_exc_handler = repository_exc_handler()
+        repository_exc_handler = repository_exc_handler_class()
 
-        item_repository = item_repository(engine=alchemy_engine,
-                                          sessionmaker=sessionmaker,
-                                          exc_handler=repository_exc_handler)
+        item_repository = item_repository_class(engine=alchemy_engine,
+                                                sessionmaker=sessionmaker,
+                                                exc_handler=repository_exc_handler)
 
-        review_repository = review_repository(engine=alchemy_engine,
-                                              sessionmaker=sessionmaker,
-                                              exc_handler=repository_exc_handler)
+        review_repository = review_repository_class(engine=alchemy_engine,
+                                                    sessionmaker=sessionmaker,
+                                                    exc_handler=repository_exc_handler)
 
-        category_repository = category_repository(engine=alchemy_engine,
-                                                  sessionmaker=sessionmaker,
-                                                  exc_handler=repository_exc_handler)
+        category_repository = category_repository_class(engine=alchemy_engine,
+                                                        sessionmaker=sessionmaker,
+                                                        exc_handler=repository_exc_handler)
 
-        if cache_config:
+        cache_client_factory = None
+        if cache_config and cache_connection_pool_class and cache_client_factory_class:
+            cache_connection_pool = cache_connection_pool_class(**asdict(cache_config))
+            cache_client_factory = cache_client_factory_class(connection_pool=cache_connection_pool)
 
+        item_service = item_service_class(repository=item_repository,
+                                          cache_client_factory=cache_client_factory)
 
-        item_service = item_service(repository=item_repository, cache_manager=cache_manager)
-        review_service = review_service(repository=review_repository, cache_manager=cache_manager)
-        category_service = category_service(repository=category_repository, cache_manager=cache_manager)
+        review_service = review_service_class(repository=review_repository,
+                                              cache_client_factory=cache_client_factory)
 
-        request_validator = request_validator(urls=urls)
-        controller = controller(item_service=item_service,
-                                review_service=review_service,
-                                category_service=category_service,
-                                request_validator=request_validator)
+        category_service = category_service_class(repository=category_repository,
+                                                  cache_client_factory=cache_client_factory)
 
-        self.app = application(controller, app_config)
+        request_validator = request_validator_class(urls=urls)
+
+        controller = controller_class(item_service=item_service,
+                                      review_service=review_service,
+                                      category_service=category_service,
+                                      request_validator=request_validator)
+
+        self.app = application_class(controller, app_config)
 
     @staticmethod
     def setup_loggers():

@@ -1,14 +1,9 @@
 from item_service.cache.core.base_cache_client import BaseCacheClient
 from item_service.models.models import Base
-from item_service.config.cache.cache_config import CacheConfig
 
 from typing import Optional
 
-from aioredis import Redis
-
-from dataclasses import asdict
-
-import json
+from redis.asyncio.client import Redis
 
 class RedisClient(BaseCacheClient):
 

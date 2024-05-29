@@ -2,14 +2,22 @@ from item_service.cache.core.base_cache_client_factory import BaseCacheClientFac
 
 from item_service.cache.redis_client import RedisClient
 
-from aioredis import Redis
-from aioredis.connection import ConnectionPool
+from redis.asyncio.client import Redis
+from redis.asyncio.connection import ConnectionPool
 
 class RedisClientFactory(BaseCacheClientFactory[RedisClient]):
+    _self = None
+    _connection_pool = None
+
+    def __new__(cls, connection_pool: ConnectionPool):
+        if not isinstance(cls._self, cls):
+            cls._self = super().__new__(cls)
+        return cls._self
 
     def __init__(self, connection_pool: ConnectionPool):
         self._connection_pool = connection_pool
 
-    def create(self) -> RedisClient:
-        redis = Redis(connection_pool=self._connection_pool)
+    @classmethod
+    def create(cls) -> RedisClient:
+        redis = Redis(connection_pool=cls._connection_pool)
         return RedisClient(cache_backend=redis)

@@ -2,6 +2,10 @@ from abc import ABC, abstractmethod
 
 class BaseCacheClientFactory[Client](ABC):
     @abstractmethod
+    def __init__(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def create(self) -> Client:
         """
         returns a cache client

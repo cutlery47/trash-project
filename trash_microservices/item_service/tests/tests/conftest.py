@@ -7,12 +7,15 @@ from item_service.controller.handlers.validator import RequestValidator
 from item_service.services.services.item_service import ItemService
 from item_service.services.services.review_service import ReviewService
 from item_service.services.services.category_service import CategoryService
-from item_service.cache.redis_client import RedisCacheManager
 
 from item_service.repositories.repositories.item_repository import ItemRepository
 from item_service.repositories.repositories.review_repository import ReviewRepository
 from item_service.repositories.repositories.category_repository import CategoryRepository
 from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
+
+from item_service.cache.redis_client import RedisClient
+from item_service.cache.redis_client_factory import RedisClientFactory
+from redis.asyncio.connection import ConnectionPool
 
 from item_service.config.database.db_config import DBConfig
 
@@ -21,8 +24,6 @@ import httpx
 
 from alembic.config import Config
 from alembic import command
-
-from redis import Redis
 
 from pathlib import Path
 
@@ -69,29 +70,28 @@ def apply_migrations(create_db):
 @pytest.fixture(scope="module")
 def app(apply_migrations) -> Application:
     app = ApplicationFactory(
-        application=Application,
-        controller=Controller,
+        application_class=Application,
+        controller_class=Controller,
 
-        item_service=ItemService,
-        review_service=ReviewService,
-        category_service=CategoryService,
+        item_service_class=ItemService,
+        review_service_class=ReviewService,
+        category_service_class=CategoryService,
 
+        request_validator_class=RequestValidator,
 
-        request_validator=RequestValidator,
+        item_repository_class=ItemRepository,
+        category_repository_class=CategoryRepository,
+        review_repository_class=ReviewRepository,
 
-        item_repository=ItemRepository,
-        category_repository=CategoryRepository,
-        review_repository=ReviewRepository,
-
-        repository_exc_handler=RepositoryExceptionHandler,
+        repository_exc_handler_class=RepositoryExceptionHandler,
 
         app_config_path="tests/config/app_config.json",
         db_config_path="tests/config/db_config.json",
         urls_path="tests/config/urls.json",
 
         cache_config_path="tests/config/cache_config.json",
-        cache_manager=RedisCacheManager,
-        cache_backend=Redis
+        cache_connection_pool_class=ConnectionPool,
+        cache_client_factory_class=RedisClientFactory
     ).create()
     yield app
 
