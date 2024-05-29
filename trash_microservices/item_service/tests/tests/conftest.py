@@ -7,7 +7,7 @@ from item_service.controller.handlers.validator import RequestValidator
 from item_service.services.services.item_service import ItemService
 from item_service.services.services.review_service import ReviewService
 from item_service.services.services.category_service import CategoryService
-from item_service.cache.redis_cache_manager import RedisCacheManager
+from item_service.cache.redis_client import RedisCacheManager
 
 from item_service.repositories.repositories.item_repository import ItemRepository
 from item_service.repositories.repositories.review_repository import ReviewRepository
@@ -75,8 +75,7 @@ def app(apply_migrations) -> Application:
         item_service=ItemService,
         review_service=ReviewService,
         category_service=CategoryService,
-        cache_manager=RedisCacheManager,
-        cache_backend=Redis,
+
 
         request_validator=RequestValidator,
 
@@ -88,8 +87,11 @@ def app(apply_migrations) -> Application:
 
         app_config_path="tests/config/app_config.json",
         db_config_path="tests/config/db_config.json",
+        urls_path="tests/config/urls.json",
+
         cache_config_path="tests/config/cache_config.json",
-        urls_path="tests/config/urls.json"
+        cache_manager=RedisCacheManager,
+        cache_backend=Redis
     ).create()
     yield app
 

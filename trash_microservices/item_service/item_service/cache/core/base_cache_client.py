@@ -3,7 +3,7 @@ from item_service.models.models import Base
 
 from typing import Optional
 
-class BaseCacheManager(ABC):
+class BaseCacheClient(ABC):
 
     @abstractmethod
     async def get(self, entity_class: str, entity_id: Optional[int] = None) -> Base | None:

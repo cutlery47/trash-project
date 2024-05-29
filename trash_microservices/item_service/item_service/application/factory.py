@@ -5,7 +5,7 @@ from item_service.controller.core.base_controller import BaseController
 from item_service.controller.handlers.validator import RequestValidator
 
 from item_service.services.core.base_service import BaseService
-from item_service.cache.core.base_cache_manager import BaseCacheManager
+from item_service.cache.core.base_cache_client import BaseCacheManager
 
 from item_service.repositories.core.base_repository import BaseRepository
 from item_service.repositories.core.base_exception_handler import BaseExceptionHandler
@@ -14,7 +14,7 @@ from item_service.config.app.app_config import AppConfig
 from item_service.config.database.db_config import DBConfig
 from item_service.config.cache.cache_config import CacheConfig
 
-from dataclasses import asdict
+from aioredis import ConnectionPool
 
 from typing import Optional
 
@@ -46,9 +46,8 @@ class ApplicationFactory(BaseFactory):
                  db_config_path: str,
                  urls_path: str,
 
-                 cache_manager: Optional[type(BaseCacheManager)] = None,
-                 cache_backend: Optional = None,
                  cache_config_path: Optional[str] = None
+                 cache_client_factory:
                  ):
 
         self.setup_loggers()
@@ -80,9 +79,8 @@ class ApplicationFactory(BaseFactory):
                                                   sessionmaker=sessionmaker,
                                                   exc_handler=repository_exc_handler)
 
-        if cache_manager and cache_config and cache_backend:
-            cache_backend = cache_backend(**asdict(cache_config))
-            cache_manager = cache_manager(cache_backend)
+        if cache_config:
+
 
         item_service = item_service(repository=item_repository, cache_manager=cache_manager)
         review_service = review_service(repository=review_repository, cache_manager=cache_manager)
