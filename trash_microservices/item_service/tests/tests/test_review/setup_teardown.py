@@ -18,13 +18,12 @@ async def setup(client: AsyncClient, user_id: int) -> (int, int):
         "in_stock": 5,
     }
 
-    await category_manager.add(category)
-    await item_manager.add(item)
+    category_id = (await category_manager.add(category)).json()
 
-    items = await item_manager.get_all_serialized()
-    categories = await category_manager.get_all_serialized()
+    item['category_id'] = category_id
+    item_id = (await item_manager.add(item)).json()
 
-    return items[0]['id'], categories[0]['id']
+    return item_id, category_id
 
 
 async def teardown(client: AsyncClient, item_id, category_id, review_ids: list[int]):
@@ -32,7 +31,9 @@ async def teardown(client: AsyncClient, item_id, category_id, review_ids: list[i
     item_manager = RequestManager(client, Item)
     review_manager = RequestManager(client, Review)
 
-    await category_manager.delete(category_id)
-    await item_manager.delete(item_id)
     for id_ in review_ids:
         await review_manager.delete(id_)
+    await item_manager.delete(item_id)
+    await category_manager.delete(category_id)
+
+

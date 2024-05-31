@@ -32,7 +32,7 @@ class RequestManager:
         categories = await self.get_all()
         return categories.json()
 
-    async def delete(self, id_: int,) -> Response:
+    async def delete(self, id_: int) -> Response:
         response = await self.client.delete(url=self.url + str(id_))
         return response
 

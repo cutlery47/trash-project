@@ -51,6 +51,7 @@ class CRUDService[AddDTO, DTO](BaseService):
             # retrieving the data from database
             orm_data = await self._repository.get()
 
+        logger.info(f"Repo data: {orm_data}")
         return [self._dto_class.model_validate(data, from_attributes=True) for data in orm_data]
 
     async def update(self, dto_id: int, add_dto: AddDTO) -> None:
@@ -67,11 +68,11 @@ class CRUDService[AddDTO, DTO](BaseService):
     async def delete(self, dto_id: int) -> None:
         # firstly, delete from the database
         await self._repository.delete(self._entity_class.id == dto_id)
+        logger.info("here")
 
         # secondly, delete from the cache
         cache_client = self._cache_client_factory.create()
         await cache_client.delete(self._dto_class.__name__, dto_id)
-
 
 
 

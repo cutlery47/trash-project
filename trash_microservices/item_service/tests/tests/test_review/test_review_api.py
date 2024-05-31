@@ -43,6 +43,8 @@ async def test_add_correct_review(client: AsyncClient, user_id: int, cookies: Co
 
     all_reviews = await review_manager.get_all_serialized()
 
+    logger.info(all_reviews)
+
     assert all_reviews[0]['text'] == review_1['text']
     assert all_reviews[1]['text'] == review_2['text']
     assert all_reviews[2]['text'] == review_3['text']

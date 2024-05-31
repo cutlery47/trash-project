@@ -44,8 +44,7 @@ class Controller(BaseController):
         @self.router.post("/items/")
         async def add_item(request: Request, item: ItemAddDTO) -> int:
             await self.validator.validate_access_and_id(cookies=request.cookies, user_id=item.merchant_id)
-            await self.item_service.create(item)
-            return 200
+            return await self.item_service.create(item)
 
         @self.router.delete("/items/{item_id}")
         async def delete_item(request: Request, item_id: int) -> int:
@@ -75,8 +74,7 @@ class Controller(BaseController):
         @self.router.post("/categories/")
         async def add_category(request: Request, category: CategoryAddDTO) -> int:
             await self.validator.validate_access(cookies=request.cookies)
-            await self.category_service.create(category)
-            return 200
+            return await self.category_service.create(category)
 
         @self.router.delete("/categories/{category_id}")
         async def delete_category(request: Request, category_id: int) -> int:
@@ -95,8 +93,7 @@ class Controller(BaseController):
         @self.router.post("/reviews/")
         async def add_review(request: Request, review: ReviewAddDTO) -> int:
             await self.validator.validate_access_and_id(cookies=request.cookies, user_id=review.reviewer_id)
-            await self.review_service.create(review)
-            return 200
+            return await self.review_service.create(review)
 
         @self.router.get("/reviews/")
         async def get_reviews(request: Request) -> list[ReviewDTO]:
