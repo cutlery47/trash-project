@@ -6,42 +6,43 @@ from typing import Optional
 class BaseCacheClient(ABC):
 
     @abstractmethod
-    async def get(self, entity_class: str, entity_id: int) -> BaseModel | None:
+    async def get(self, name: str, id_: int) -> dict | None:
         """
         returns data, stored in cache, if any
-        :param entity_class:
-        :param entity_id:
+        :param name:
+        :param id_:
         :return:
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def set(self, entity_class: str, entity: BaseModel) -> None:
+    async def set(self, name: str,  data: dict, id_: int) -> None:
         """
         updates data stored in cache by a key, if any
-        :param entity:
-        :param entity_class:
+        :param id_:
+        :param name:
+        :param data:
         :return:
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def delete(self, entity_class: str, entity_id: int) -> None:
+    async def delete(self, name: str, id_: int) -> None:
         """
         deletes data stored in cache by a key, if any
-        :param entity_class:
-        :param entity_id:
+        :param name:
+        :param id_:
         :return:
         """
         raise NotImplementedError
 
     @staticmethod
     @abstractmethod
-    async def _generate_key(entity_class: str, entity_id: int) -> str:
+    async def _generate_key(name: str, id_: int) -> str:
         """
         generate a key for cache storage
-        :param entity_class:
-        :param entity_id:
+        :param: name
+        :param id_:
         :return:
         """
         raise NotImplementedError

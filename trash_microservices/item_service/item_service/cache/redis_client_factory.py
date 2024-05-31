@@ -19,5 +19,5 @@ class RedisClientFactory(BaseCacheClientFactory):
 
     @classmethod
     def create(cls) -> RedisClient:
-        redis = Redis(connection_pool=cls._connection_pool)
+        redis = Redis(connection_pool=cls._connection_pool, decode_responses=True)
         return RedisClient(cache_backend=redis)

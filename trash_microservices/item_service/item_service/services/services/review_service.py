@@ -28,10 +28,9 @@ class ReviewService(CRUDService[ReviewAddDTO, ReviewDTO], BaseReviewService):
 
         review_dto = ReviewDTO(**review_data, **review_add_dto.model_dump())
         review_dto.reviewed_at = str(review_dto.reviewed_at)
-        await cache_client.set(entity_class=str(review_dto), entity=review_dto)
+        await cache_client.set(name=self._dto_class.__name__, data=review_dto.model_dump(), id_=review_dto.id)
 
         return int(review_data["id"])
-
 
     async def get_by_user_id(self, user_id: int) -> list[ReviewDTO]:
         orm_data = await self._repository.get(self._entity_class.reviewer_id == user_id)
