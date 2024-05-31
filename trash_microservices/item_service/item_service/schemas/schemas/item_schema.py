@@ -11,10 +11,13 @@ class BaseItemDTO(BaseModel):
     description: str
     price: PositiveFloat
     in_stock: PositiveInteger
-    image: Optional[str] = None
+    image: Optional[str] = ""
 
 class ItemAddDTO(BaseItemDTO):
     pass
 
 class ItemDTO(BaseItemDTO):
     id: PositiveInteger
+
+    def __str__(self):
+        return "Item"

@@ -16,3 +16,6 @@ class ReviewAddDTO(BaseReviewDTO):
 class ReviewDTO(BaseReviewDTO):
     id: PositiveInteger
     reviewed_at: datetime
+
+    def __str__(self):
+        return "Review"

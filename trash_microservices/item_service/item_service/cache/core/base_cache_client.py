@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from item_service.models.models import Base
+from pydantic import BaseModel
 
 from typing import Optional
 
 class BaseCacheClient(ABC):
 
     @abstractmethod
-    async def get(self, entity_class: str, entity_id: Optional[int] = None) -> Base | None:
+    async def get(self, entity_class: str, entity_id: int) -> BaseModel | None:
         """
         returns data, stored in cache, if any
         :param entity_class:
@@ -16,11 +16,11 @@ class BaseCacheClient(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def set(self, entity_class: str, entity_id: int) -> None:
+    async def set(self, entity_class: str, entity: BaseModel) -> None:
         """
         updates data stored in cache by a key, if any
+        :param entity:
         :param entity_class:
-        :param entity_id:
         :return:
         """
         raise NotImplementedError

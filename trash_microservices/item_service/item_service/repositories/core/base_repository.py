@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, AsyncSession
 class BaseRepository[Entity](ABC):
 
     @abstractmethod
-    async def create(self, entity: Entity) -> None:
+    async def create(self, entity: Entity) -> int:
         """
         Creates a new entity in the repositories.
         :param entity:

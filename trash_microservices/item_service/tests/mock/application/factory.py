@@ -40,7 +40,7 @@ class MockApplicationFactory(BaseFactory):
 
     @staticmethod
     def setup_loggers() -> None:
-        logger.add(sink="logs/logs.json",
+        logger.add(sink="logs/err_logs.json",
                    level="ERROR",
                    format="{time:DD/MM/YYYY/HH:mm:ss} "
                           "|{level}| line {line} in {module}.{function}: {message}",

@@ -24,7 +24,7 @@ class CRUDRepository[Entity: Base](BaseRepository):
         self.sessionmaker = sessionmaker
         self.exc_handler = exc_handler
 
-    async def create(self, entity: Entity) -> None:
+    async def create(self, entity: Entity) -> int:
         async with self.sessionmaker() as session:
             try:
                 session.add(entity)
@@ -33,6 +33,7 @@ class CRUDRepository[Entity: Base](BaseRepository):
                 self.exc_handler.handle(exc)
             else:
                 await session.commit()
+                return entity.id
 
     async def get(self, *filters) -> list[Entity]:
         async with self.sessionmaker() as session:

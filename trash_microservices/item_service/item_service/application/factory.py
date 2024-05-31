@@ -33,27 +33,27 @@ import json
 
 class ApplicationFactory(BaseFactory):
     def __init__(self,
-                 application_class: type(BaseApplication),
+                 application_class: BaseApplication.__class__,
 
-                 controller_class: type(BaseController),
-                 request_validator_class: type(RequestValidator),
+                 controller_class: BaseController.__class__,
+                 request_validator_class: RequestValidator.__class__,
 
-                 item_service_class: type(BaseService),
-                 review_service_class: type(BaseService),
-                 category_service_class: type(BaseService),
+                 item_service_class: BaseService.__class__,
+                 review_service_class: BaseService.__class__,
+                 category_service_class: BaseService.__class__,
 
-                 item_repository_class: type(BaseRepository),
-                 review_repository_class: type(BaseRepository),
-                 category_repository_class: type(BaseRepository),
-                 repository_exc_handler_class: type(BaseExceptionHandler),
+                 item_repository_class: BaseRepository.__class__,
+                 review_repository_class: BaseRepository.__class__,
+                 category_repository_class: BaseRepository.__class__,
+                 repository_exc_handler_class: BaseExceptionHandler.__class__,
 
                  app_config_path: str,
                  db_config_path: str,
                  urls_path: str,
 
-                 cache_config_path: Optional[str] = None,
-                 cache_client_factory_class: Optional[type(BaseCacheClientFactory)] = None,
-                 cache_connection_pool_class: Optional[type(ConnectionPool) | Any] = None
+                 cache_config_path: str = None,
+                 cache_client_factory_class: BaseCacheClientFactory.__class__ = None,
+                 cache_connection_pool_class: ConnectionPool.__class__ | Any = None
                  ):
 
         self.setup_loggers()
@@ -71,48 +71,59 @@ class ApplicationFactory(BaseFactory):
 
         # passing the single instance of handler to each repo
         # may cause some drawbacks which I can't think of currently
-        repository_exc_handler = repository_exc_handler_class()
+        repository_exc_handler: BaseExceptionHandler = repository_exc_handler_class()
 
-        item_repository = item_repository_class(engine=alchemy_engine,
-                                                sessionmaker=sessionmaker,
-                                                exc_handler=repository_exc_handler)
+        item_repository: BaseRepository = item_repository_class(engine=alchemy_engine,
+                                                                sessionmaker=sessionmaker,
+                                                                exc_handler=repository_exc_handler)
 
-        review_repository = review_repository_class(engine=alchemy_engine,
-                                                    sessionmaker=sessionmaker,
-                                                    exc_handler=repository_exc_handler)
+        review_repository: BaseRepository = review_repository_class(engine=alchemy_engine,
+                                                                    sessionmaker=sessionmaker,
+                                                                    exc_handler=repository_exc_handler)
 
-        category_repository = category_repository_class(engine=alchemy_engine,
-                                                        sessionmaker=sessionmaker,
-                                                        exc_handler=repository_exc_handler)
+        category_repository: BaseRepository = category_repository_class(engine=alchemy_engine,
+                                                                        sessionmaker=sessionmaker,
+                                                                        exc_handler=repository_exc_handler)
 
         cache_client_factory = None
         if cache_config and cache_connection_pool_class and cache_client_factory_class:
             cache_connection_pool = cache_connection_pool_class(**asdict(cache_config))
             cache_client_factory = cache_client_factory_class(connection_pool=cache_connection_pool)
 
-        item_service = item_service_class(repository=item_repository,
-                                          cache_client_factory=cache_client_factory)
+        item_service: BaseService = item_service_class(repository=item_repository,
+                                                       cache_client_factory=cache_client_factory)
 
-        review_service = review_service_class(repository=review_repository,
-                                              cache_client_factory=cache_client_factory)
+        review_service: BaseService = review_service_class(repository=review_repository,
+                                                           cache_client_factory=cache_client_factory)
 
-        category_service = category_service_class(repository=category_repository,
-                                                  cache_client_factory=cache_client_factory)
+        category_service: BaseService = category_service_class(repository=category_repository,
+                                                               cache_client_factory=cache_client_factory)
 
-        request_validator = request_validator_class(urls=urls)
+        request_validator: RequestValidator = request_validator_class(urls=urls)
 
-        controller = controller_class(item_service=item_service,
-                                      review_service=review_service,
-                                      category_service=category_service,
-                                      request_validator=request_validator)
+        controller: BaseController = controller_class(item_service=item_service,
+                                                      review_service=review_service,
+                                                      category_service=category_service,
+                                                      request_validator=request_validator)
 
-        self.app = application_class(controller, app_config)
+        self.app: BaseApplication = application_class(controller, app_config)
 
     @staticmethod
     def setup_loggers():
+        logger.remove()
+
         # file logger
-        logger.add(sink="item_service/logs/logs.json",
+        logger.add(sink="item_service/logs/err_logs.json",
                    level="ERROR",
+                   format="{time:DD/MM/YYYY/HH:mm:ss} "
+                          "|{level}| line {line} in {module}.{function}: {message}",
+                   colorize=True,
+                   serialize=True,
+                   rotation="1 MB",
+                   compression="zip")
+
+        logger.add(sink="item_service/logs/logs.json",
+                   level="INFO",
                    format="{time:DD/MM/YYYY/HH:mm:ss} "
                           "|{level}| line {line} in {module}.{function}: {message}",
                    colorize=True,

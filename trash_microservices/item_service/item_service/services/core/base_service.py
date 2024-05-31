@@ -7,7 +7,7 @@ from item_service.schemas.schemas.review_schema import ReviewDTO
 class BaseService[DTO: BaseModel](ABC):
 
     @abstractmethod
-    async def create(self, dto: DTO) -> None:
+    async def create(self, dto: DTO) -> int:
         """
         Carries out business logic to create a new entity.
         :param dto:

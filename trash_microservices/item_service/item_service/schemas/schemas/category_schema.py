@@ -10,3 +10,6 @@ class CategoryAddDTO(BaseCategoryDTO):
 
 class CategoryDTO(BaseCategoryDTO):
     id: PositiveInteger
+
+    def __str__(self):
+        return "Category"

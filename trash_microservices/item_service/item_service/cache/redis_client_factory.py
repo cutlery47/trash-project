@@ -5,7 +5,7 @@ from item_service.cache.redis_client import RedisClient
 from redis.asyncio.client import Redis
 from redis.asyncio.connection import ConnectionPool
 
-class RedisClientFactory(BaseCacheClientFactory[RedisClient]):
+class RedisClientFactory(BaseCacheClientFactory):
     _self = None
     _connection_pool = None
 
