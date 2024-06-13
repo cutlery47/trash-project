@@ -1,10 +1,10 @@
 import random
 
-from user_service.storage.entities.entities import User
-from user_service.storage.repositories.repository import AuthRepository
-from user_service.services.handlers import TokenHandler, PasswordHandler, EmailHandler
+from auth_gateway.storage.entities.entities import User
+from auth_gateway.storage.repositories.repository import AuthRepository
+from auth_gateway.services.handlers import TokenHandler, PasswordHandler, EmailHandler
 
-from user_service.exceptions import service_exceptions, repository_exceptions
+from auth_gateway.exceptions import service_exceptions, repository_exceptions
 
 
 class AuthService:

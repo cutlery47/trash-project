@@ -1,15 +1,11 @@
 from flask import Blueprint
 
-from user_service.controllers.controller import AuthController
+from auth_gateway.controllers.controller import AuthController
+
+from auth_gateway.router.router import Router
 
 
-class Router(Blueprint):
-    def __init__(self, name, import_name, url_prefix, controller: AuthController):
-        super().__init__(name, import_name, url_prefix=url_prefix)
-        self.controller = controller
-
-
-def register_routes(router: Router):
+def register_auth_routes(router: Router):
     @router.post("/validate_access/")
     # validates jwt access token when requesting resources
     def validate_access():
@@ -56,12 +52,12 @@ def register_routes(router: Router):
         return router.controller.refresh()
 
     @router.get("/users/<int:user_id>")
-    # returns user user_service-info specified by id
+    # returns user auth_gateway-info specified by id
     def get_user(user_id):
         return router.controller.get(user_id)
 
     @router.get("/users/")
-    # returns all users user_service-info
+    # returns all users auth_gateway-info
     def get_all_users():
         return router.controller.get_all()
 

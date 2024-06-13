@@ -6,7 +6,7 @@ from flask import current_app
 from email_validator import validate_email
 
 from email_validator import EmailNotValidError
-from user_service.exceptions import service_exceptions
+from auth_gateway.exceptions import service_exceptions
 
 
 class TokenHandler:

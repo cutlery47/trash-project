@@ -1,15 +1,13 @@
 import psycopg2
 from flask import make_response, Response, request
 
-from user_service.services.service import AuthService
-from user_service.storage.entities.serializers import UserSerializer
+from auth_gateway.services.service import AuthService
+from auth_gateway.storage.entities.serializers import UserSerializer
 
-from user_service.exceptions import service_exceptions, repository_exceptions
-from user_service.controllers.validators import make_response_from_exception
-from user_service.controllers.decorators import (access_required, admin_required, id_access_required,
+from auth_gateway.exceptions import service_exceptions, repository_exceptions
+from auth_gateway.controllers.validators import make_response_from_exception
+from auth_gateway.controllers.decorators import (access_required, admin_required, id_access_required,
                                                  fields_required, refresh_required)
-
-# TODO: new permissions system
 
 
 class AuthController:
@@ -156,13 +154,3 @@ class AuthController:
 
         return make_response("200", 200)
 
-    @access_required
-    def get_user_role(self, id_: int) -> Response:
-        try:
-            role = self.service.get_user_role(id_)
-        except repository_exceptions.RoleNotFoundError as err:
-            return make_response_from_exception(err, 400, str(err))
-        except (psycopg2.Error, repository_exceptions.PostgresConnError, Exception) as err:
-            return make_response_from_exception(err, 500, "Unexpected error happened on the server")
-
-        return make_response(role, 200)

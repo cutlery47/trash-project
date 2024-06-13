@@ -33,29 +33,27 @@ class Controller(BaseController):
 
         @self.router.get("/items/")
         async def get_items(request: Request) -> list[ItemDTO]:
-            await self.validator.validate_access(cookies=request.cookies)
             return await self.item_service.get()
 
         @self.router.get("/items/{item_id}")
         async def get_item(request: Request, item_id: int) -> list[ItemDTO]:
-            await self.validator.validate_access(cookies=request.cookies)
             return await self.item_service.get(item_id)
 
         @self.router.post("/items/")
         async def add_item(request: Request, item: ItemAddDTO) -> int:
-            await self.validator.validate_access_and_id(cookies=request.cookies, user_id=item.merchant_id)
+            await self.validator.validate_access_and_id(user_id=item.merchant_id, cookies=request.cookies)
             return await self.item_service.create(item)
 
         @self.router.delete("/items/{item_id}")
         async def delete_item(request: Request, item_id: int) -> int:
             item = await self.item_service.get(item_id)
-            await self.validator.validate_access_and_id(cookies=request.cookies, user_id=item[0].merchant_id)
+            await self.validator.validate_access_to_id(cookies=request.cookies, user_id=item[0].merchant_id)
             await self.item_service.delete(item_id)
             return 200
 
         @self.router.put("/items/{item_id}")
         async def update_item(request: Request, item: ItemAddDTO, item_id: int) -> int:
-            await self.validator.validate_access_and_id(cookies=request.cookies, user_id=item.merchant_id)
+            await self.validator.validate_access_to_id(cookies=request.cookies, user_id=item.merchant_id)
             await self.item_service.update(item_id, item)
             return 200
 

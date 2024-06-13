@@ -21,8 +21,6 @@ class RedisClient(BaseCacheClient):
     async def delete(self, name: str, id_: int) -> None:
         key = self._generate_key(name, id_)
         res = await self._backend.delete(key)
-        logger.info(res)
-        logger.info("23123123123123")
 
         logger.info(f"Objects deleted from cache: {res}. By key: {key}")
 

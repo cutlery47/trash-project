@@ -2,12 +2,12 @@ from pypika import Query, Table
 from dataclasses import fields
 import psycopg2
 
-from user_service.storage.entities.entities import User
-from user_service.config.database.db_config import DBConfig
-from user_service.storage.repositories.query_builder import QueryBuilder
-from user_service.interfaces.repository_interface import AuthRepositoryInterface
+from auth_gateway.storage.entities.entities import User
+from auth_gateway.config.database.db_config import DBConfig
+from auth_gateway.storage.repositories.query_builder import QueryBuilder
+from auth_gateway.interfaces.repository_interface import AuthRepositoryInterface
 
-from user_service.exceptions import repository_exceptions
+from auth_gateway.exceptions import repository_exceptions
 
 
 # noinspection PyTypeChecker

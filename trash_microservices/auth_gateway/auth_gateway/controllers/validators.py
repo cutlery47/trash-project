@@ -1,11 +1,11 @@
 import functools
 
 from flask import current_app, make_response, Response, request
-from user_service.services.handlers import TokenHandler
+from auth_gateway.services.handlers import TokenHandler
 
-from user_service.exceptions.controller_exceptions import (RequiredFieldsNotProvidedError, NotAllowedToAccessResource,
+from auth_gateway.exceptions.controller_exceptions import (RequiredFieldsNotProvidedError, NotAllowedToAccessResource,
                                                            ForbiddenFieldsProvidedError)
-from user_service.exceptions.service_exceptions import TokenIsInvalid, AdminRoleRequired
+from auth_gateway.exceptions.service_exceptions import TokenIsInvalid, AdminRoleRequired
 
 
 def make_response_from_exception(err, status: int, response: str) -> Response:
