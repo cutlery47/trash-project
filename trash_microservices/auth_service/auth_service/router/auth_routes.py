@@ -1,8 +1,4 @@
-from flask import Blueprint
-
-from auth_gateway.controllers.controller import AuthController
-
-from auth_gateway.router.router import Router
+from auth_service.router.router import Router
 
 
 def register_auth_routes(router: Router):
@@ -52,12 +48,12 @@ def register_auth_routes(router: Router):
         return router.controller.refresh()
 
     @router.get("/users/<int:user_id>")
-    # returns user auth_gateway-info specified by id
+    # returns user auth_service-info specified by id
     def get_user(user_id):
         return router.controller.get(user_id)
 
     @router.get("/users/")
-    # returns all users auth_gateway-info
+    # returns all users auth_service-info
     def get_all_users():
         return router.controller.get_all()
 

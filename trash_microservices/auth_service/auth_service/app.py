@@ -1,19 +1,18 @@
 from flask import Flask
 import json
 
-from auth_gateway.storage.repositories.repository import AuthRepository
-from auth_gateway.controllers.controller import AuthController
-from auth_gateway.services.service import AuthService
-from auth_gateway.router.router import Router
-from auth_gateway.router.auth_routes import register_auth_routes
-from auth_gateway.router.item_routes import register_item_routes
+from auth_service.storage.repositories.repository import AuthRepository
+from auth_service.controllers.controller import AuthController
+from auth_service.services.service import AuthService
+from auth_service.router.router import Router
+from auth_service.router.auth_routes import register_auth_routes
 
-from auth_gateway.storage.repositories.query_builder import QueryBuilder
-from auth_gateway.config.database.db_config import DBConfig
-from auth_gateway.services.handlers import TokenHandler, EmailHandler, PasswordHandler
-from auth_gateway.storage.entities.serializers import UserSerializer
+from auth_service.storage.repositories.query_builder import QueryBuilder
+from auth_service.config.database.db_config import DBConfig
+from auth_service.services.handlers import TokenHandler, EmailHandler, PasswordHandler
+from auth_service.storage.entities.serializers import UserSerializer
 
-from auth_gateway.interfaces.factory_interface import FactoryInterface
+from auth_service.interfaces.factory_interface import FactoryInterface
 
 
 class TrashFactory(FactoryInterface):
@@ -33,7 +32,6 @@ class TrashFactory(FactoryInterface):
 
         # routing
         register_auth_routes(router)
-        register_item_routes(router)
         app.register_blueprint(router)
 
         return app
@@ -42,8 +40,8 @@ class TrashFactory(FactoryInterface):
 if __name__ == "__main__":
     trash = TrashFactory.create(
         app_config="config/app/app_config.json",
-        db_config="auth_gateway/config/database/db_config.json",
-        jwt_secret_path="auth_gateway/config/app/jwt_secret.txt"
+        db_config="auth_service/config/database/db_config.json",
+        jwt_secret_path="auth_service/config/app/jwt_secret.txt"
     )
 
     trash.run(host="0.0.0.0", port=9876)

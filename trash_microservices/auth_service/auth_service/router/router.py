@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from auth_gateway.controllers.controller import AuthController
+from auth_service.controllers.controller import AuthController
 
 class Router(Blueprint):
     def __init__(self, name, import_name, url_prefix, controller: AuthController):

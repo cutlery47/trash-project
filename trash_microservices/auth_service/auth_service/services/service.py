@@ -1,10 +1,10 @@
 import random
 
-from auth_gateway.storage.entities.entities import User
-from auth_gateway.storage.repositories.repository import AuthRepository
-from auth_gateway.services.handlers import TokenHandler, PasswordHandler, EmailHandler
+from auth_service.storage.entities.entities import User
+from auth_service.storage.repositories.repository import AuthRepository
+from auth_service.services.handlers import TokenHandler, PasswordHandler, EmailHandler
 
-from auth_gateway.exceptions import service_exceptions, repository_exceptions
+from auth_service.exceptions import service_exceptions, repository_exceptions
 
 
 class AuthService:
@@ -28,7 +28,6 @@ class AuthService:
 
     def authenticate(self, email, password) -> User:
         user = self.get_by_email(email, secure=False)
-        print(f"authent: {user.id}")
         if user.password != self.password_handler.hash(password):
             raise (service_exceptions.
                    PasswordDoesNotMatchError("Password doesnt match the stored one"))

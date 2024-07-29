@@ -2,7 +2,7 @@ import functools
 
 from flask import request
 
-from auth_gateway.controllers.validators import TokenValidator, InputValidator
+from auth_service.controllers.validators import TokenValidator, InputValidator
 
 
 # decorator for access validation

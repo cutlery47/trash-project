@@ -1,12 +1,12 @@
 import psycopg2
 from flask import make_response, Response, request
 
-from auth_gateway.services.service import AuthService
-from auth_gateway.storage.entities.serializers import UserSerializer
+from auth_service.services.service import AuthService
+from auth_service.storage.entities.serializers import UserSerializer
 
-from auth_gateway.exceptions import service_exceptions, repository_exceptions
-from auth_gateway.controllers.validators import make_response_from_exception
-from auth_gateway.controllers.decorators import (access_required, admin_required, id_access_required,
+from auth_service.exceptions import service_exceptions, repository_exceptions
+from auth_service.controllers.validators import make_response_from_exception
+from auth_service.controllers.decorators import (access_required, admin_required, id_access_required,
                                                  fields_required, refresh_required)
 
 
