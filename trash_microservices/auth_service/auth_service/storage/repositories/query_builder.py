@@ -1,9 +1,14 @@
-from pypika import Query, Table
+from pypika import Query, Table, Criterion
 
 
-class QueryBuilder:
+class CRUDQueryBuilder:
+
     @staticmethod
-    def get(table: Table, fields: tuple, condition=None) -> str:
+    def create(table: Table, fields: tuple) -> str:
+        return Query.into(table).insert(*fields).get_sql()
+
+    @staticmethod
+    def read(table: Table, fields: tuple, condition: Criterion = None) -> str:
         q = Query.from_(table).select(*fields)
 
         # if condition is not provided -- generate "get all" query
@@ -13,15 +18,7 @@ class QueryBuilder:
         return q.get_sql()
 
     @staticmethod
-    def create(table: Table, fields: tuple) -> str:
-        return Query.into(table).insert(*fields).get_sql()
-
-    @staticmethod
-    def delete(table: Table, condition) -> str:
-        return Query.from_(table).delete().where(condition).get_sql()
-
-    @staticmethod
-    def update(table: Table, fields: [tuple], condition) -> str:
+    def update(table: Table, fields: [str, str], condition: Criterion) -> str:
         q = Query.update(table)
 
         for field in fields:
@@ -33,5 +30,6 @@ class QueryBuilder:
 
         return q
 
-
-
+    @staticmethod
+    def delete(table: Table, condition: Criterion) -> str:
+        return Query.from_(table).delete().where(condition).get_sql()

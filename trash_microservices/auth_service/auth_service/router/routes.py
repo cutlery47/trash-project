@@ -2,20 +2,21 @@ from auth_service.router.router import Router
 
 
 def register_auth_routes(router: Router):
+
     @router.post("/validate_access/")
     # validates jwt access token when requesting resources
-    def validate_access():
-        return router.controller.validate_access()
-
-    @router.post("/validate_admin/")
-    # validates that user has admin permissions
-    def validate_admin():
-        return router.controller.validate_admin()
+    def validate_access_token():
+        return router.controller.validate_access_token()
 
     @router.post("/validate_access/<int:user_id>")
     # validates access to a particular resource
     def validate_access_to_id(user_id):
         return router.controller.validate_access_to_id(user_id)
+
+    @router.post("/validate_admin/")
+    # validates that user has admin permissions
+    def validate_admin():
+        return router.controller.validate_admin()
 
     @router.post("/validate_access_and_admin/")
     # validates access token and then validates admin permissions
