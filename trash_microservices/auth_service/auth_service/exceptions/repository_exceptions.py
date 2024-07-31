@@ -1,26 +1,28 @@
-class RepositoryError(Exception):
+from werkzeug.exceptions import HTTPException
+
+class RepositoryException(HTTPException):
     pass
 
 
-class PostgresConnError(RepositoryError):
+class PostgresConnError(RepositoryException):
     pass
 
 
-class UserNotFoundError(RepositoryError):
+class UserNotFoundError(RepositoryException):
     pass
 
 
-class FieldsNotProvidedError(RepositoryError):
+class FieldsNotProvidedError(RepositoryException):
     pass
 
 
-class RoleNotFoundError(RepositoryError):
+class RoleNotFoundError(RepositoryException):
     pass
 
 
-class PermissionsNotFoundError(RepositoryError):
+class PermissionsNotFoundError(RepositoryException):
     pass
 
 
-class UniqueConstraintError(RepositoryError):
+class UniqueConstraintError(RepositoryException):
     pass
