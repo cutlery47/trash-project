@@ -7,6 +7,8 @@ class User:
     role: str = None
     email: str = None
     password: str = None
+    firstname: str = None
+    surname: str = None
 
     def serialize(self, is_secure: bool = False) -> dict:
         res = dict()

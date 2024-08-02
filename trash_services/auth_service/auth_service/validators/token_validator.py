@@ -44,7 +44,6 @@ class TokenValidator:
 
         role = decoded.get("role")
         if role != "admin":
-            #raise EmailIsInvalid("123123123")
             raise NotAllowedToAccessResource("Admin rights are required to access this resource")
 
     def validate_id_access(self):

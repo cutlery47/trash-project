@@ -67,17 +67,27 @@ class AuthController:
         users = self.service.get(is_secure=True)
         return make_response([user.serialize() for user in users], 200)
 
-    @fields_required(['email', 'password'])
+    @fields_required(['email', 'password', "firstname", "surname"])
     def create_user(self) -> Response:
-        user = User(email=request.json["email"], password=request.json["password"], role="user")
+        user = User(email=request.json["email"],
+                    password=request.json["password"],
+                    firstname=request.json["firstname"],
+                    surname=request.json["surname"],
+                    role="user")
+
         created_user = self.service.create(user)
         return make_response(created_user.serialize(is_secure=True), 200)
 
     @access_required
     @admin_required
-    @fields_required(['email', 'password'])
+    @fields_required(['email', 'password', "firstname", "surname"])
     def create_admin(self) -> Response:
-        admin = User(email=request.json["email"], password=request.json["password"], role="admin")
+        admin = User(email=request.json["email"],
+                     password=request.json["password"],
+                     firstname=request.json["firstname"],
+                     surname=request.json["surname"],
+                     role="admin")
+
         created_admin = self.service.create(admin)
         return make_response(created_admin.serialize(is_secure=True), 200)
 
@@ -90,7 +100,10 @@ class AuthController:
     @access_required
     @id_access_required
     def update(self, id_: int) -> Response:
-        user = User(email=request.json['email'], password=request.json['password'])
+        user = User(email=request.json.get('email'),
+                    password=request.json.get('password'),
+                    firstname=request.json.get('firstname'),
+                    surname=request.json.get('surname'))
+
         self.service.update(id_, user)
         return make_response("200", 200)
-

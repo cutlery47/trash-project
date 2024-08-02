@@ -29,7 +29,6 @@ class AuthService:
         self.password_hasher = password_hasher
 
     def authorize(self, email: str, password: str) -> dict:
-
         user = self.authenticate(email, password)
         access_token = self.token_generator.generate_access(str(user.id), user.email, user.role)
         refresh_token = self.token_generator.generate_refresh(str(user.id))
@@ -39,7 +38,6 @@ class AuthService:
                 "id": user.id}
 
     def authenticate(self, email: str, password: str) -> User:
-
         user = self.get(email=email, is_secure=False)
         if user.password != self.password_hasher.hash(password):
             raise PasswordDoesNotMatch("Password doesnt match the stored one")
@@ -49,7 +47,6 @@ class AuthService:
     # "is_secure" parameter removes password from response body
 
     def get(self, id_: int = None, email: str = None, is_secure: bool = True) -> User | List:
-
         if id_ is not None:
             # get user by id
             return self.repository.get(is_secure=is_secure, id_=id_)
@@ -61,7 +58,6 @@ class AuthService:
             return self.repository.get_all(is_secure=is_secure)
 
     def create(self, user: User) -> User:
-
         user.id = self.randomize_id(1, 2 ** 31 - 1)
 
         # email validation + normalization
@@ -76,15 +72,18 @@ class AuthService:
         return user
 
     def delete(self, id_: int):
-
         self.repository.delete(id_)
 
     def update(self, id_, user: User):
+        if user.email is not None:
+            self.credentials_validator.validate_email(user.email)
+
+        if user.password is not None:
+            self.credentials_validator.validate_password(user.password)
 
         self.repository.update(id_, user)
 
     def randomize_id(self, lower_bound: int, upper_bound: int) -> int:
-
         while True:
             id_ = random.randint(lower_bound, upper_bound)
             try:
@@ -93,7 +92,6 @@ class AuthService:
                 return id_
 
     def refresh_access_token(self, refresh_token: str) -> dict:
-
         id_ = self.token_validator.decode(refresh_token)["id"]
         user = self.get(id_)
 
