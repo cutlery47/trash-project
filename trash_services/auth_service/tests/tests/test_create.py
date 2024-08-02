@@ -33,7 +33,9 @@ def test_create_user(setup_teardown_db, test_client):
     response = test_client.post("/api/v1/register/",
                                  json={
                                      "email": example_good_email,
-                                     "password": example_good_password
+                                     "password": example_good_password,
+                                     "firstname": "sdfsdfdsfd",
+                                     "surname": "123123123"
                                  })
 
     assert response.status_code == 200

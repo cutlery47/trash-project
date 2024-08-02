@@ -62,7 +62,9 @@ def user(setup_teardown_db, test_client):
     response = test_client.post('/api/v1/register/',
                                 json={
                                     'email': example_good_email,
-                                    'password': example_good_password
+                                    'password': example_good_password,
+                                    'firstname': "Big",
+                                    'surname': 'RunningBack'
                                 })
 
     user = User(**json.loads(response.text))
