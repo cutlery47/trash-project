@@ -1,1 +1,1 @@
-DROP TABLE "users" CASCADE;
+DROP TABLE users CASCADE;

@@ -30,6 +30,9 @@ where = ["auth_service"]
 [tool.setuptools.package-data]
 "*" = ["*.txt", "*.json"]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [options]
 include_package_data = true
 
