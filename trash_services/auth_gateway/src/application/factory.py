@@ -17,6 +17,9 @@ from src.validators.credentials_validator import CredentialsValidator
 from src.controller.controller import AuthController
 
 from src.router.router import Router
+from src.router.auth_routes import register_auth_routes
+from src.router.item_service_routes import register_item_routes
+from src.router.user_service_routes import register_user_routes
 
 from src.application.application import Application
 
@@ -39,6 +42,10 @@ class ApplicationFactory:
 
         router = Router(url_prefix="/api/v1",
                         controller=controller)
+
+        register_auth_routes(router)
+        register_user_routes(router)
+        register_item_routes(router)
 
         application = Application(router)
 

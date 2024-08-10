@@ -10,7 +10,7 @@ from src.interfaces.repository_interface import AuthRepositoryInterface
 from src.exceptions.repository_exceptions import *
 
 
-# noinspection PyTypeChecker
+# noinspection PyTypeChecker,SqlResolve
 class AuthRepository(AuthRepositoryInterface):
 
     def __init__(self, config: DBConfig, query_builder: CRUDQueryBuilder):
@@ -117,3 +117,6 @@ class AuthRepository(AuthRepositoryInterface):
         # if number of affected fields = 0, => nothing has updated
         if self.cursor.rowcount == 0:
             raise DataNotFound("User was not found by specified id")
+
+    def exists(self, id_: int) -> bool:
+        return self.cursor.execute(f"SELECT EXISTS(SELECT 1 FROM users WHERE id={id_})")

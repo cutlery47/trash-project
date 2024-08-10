@@ -25,18 +25,20 @@ class AuthController:
         return self.token_validator.get_or_validate_access_token(validate=True,
                                                                  request=request)
 
-    def validate_admin(self, request: Request, token: dict = None):
+    def validate_admin(self, request: Request, token: dict = None) -> dict:
         if token is None:
             token = self.token_validator.get_or_validate_access_token(validate=False,
                                                                       request=request)
         self.token_validator.validate_admin(token)
+        return token
 
-    def validate_access_to_id(self, request: Request, id_: int, token: dict = None,):
+    def validate_access_to_id(self, request: Request, id_: int, token: dict = None) -> dict:
         if token is None:
             token = self.token_validator.get_or_validate_access_token(validate=False,
                                                                       request=request)
         self.token_validator.validate_id_access(token=token,
                                                 id_=id_)
+        return token
 
     def authorize(self, email: str, password: str, response: Response):
         self.service.authorize(email, password, response)

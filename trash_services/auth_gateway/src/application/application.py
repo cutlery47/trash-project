@@ -10,7 +10,7 @@ class Application:
     def __init__(self, *routers: Router):
         self._app = FastAPI()
         for router in routers:
-            self._app.include_router(router.router)
+            self._app.include_router(router.api)
 
     def asgi_app(self) -> FastAPI:
         return self._app

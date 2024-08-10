@@ -67,9 +67,7 @@ class AuthService:
     def randomize_id(self, lower_bound: int, upper_bound: int) -> int:
         while True:
             id_ = random.randint(lower_bound, upper_bound)
-            try:
-                self.repository.get(False, id_=id_)
-            except DataNotFound:
+            if not self.repository.exists(id_):
                 return id_
 
     def refresh_access_token(self, refresh_token: dict, response: Response) -> Response:

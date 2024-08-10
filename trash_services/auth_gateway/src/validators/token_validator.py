@@ -1,11 +1,14 @@
+import os
+
 import jwt
 
 from src.exceptions.validation_exceptions import (RequiredFieldsNotProvided,
-                                                           NotAllowedToAccessResource,
-                                                           TokenIsInvalid,
-                                                           EmailIsInvalid)
+                                                  NotAllowedToAccessResource,
+                                                  TokenIsInvalid)
 
 from fastapi.requests import Request
+
+SECRET_KEY = os.getenv("SECRET_KEY", "SECRET_KEY")
 
 class TokenValidator:
 
@@ -15,7 +18,8 @@ class TokenValidator:
         try:
             decoded = jwt.decode(jwt=raw_jwt_,
                                  algorithms=self.algorithm,
-                                 options={"verify_signature": validate})
+                                 options={"verify_signature": validate},
+                                 key=SECRET_KEY)
         except jwt.PyJWTError as err:
             raise TokenIsInvalid(f"Provided token is invalid: {str(err)}")
 
