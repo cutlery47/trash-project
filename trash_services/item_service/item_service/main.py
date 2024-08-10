@@ -8,9 +8,7 @@ from item_service.services.services.review_service import ReviewService
 from item_service.services.services.item_service import ItemService
 from item_service.services.services.category_service import CategoryService
 
-from item_service.repositories.repositories.item_repository import ItemRepository
-from item_service.repositories.repositories.review_repository import ReviewRepository
-from item_service.repositories.repositories.category_repository import CategoryRepository
+from item_service.repositories.repositories.repositories import ItemRepository, CategoryRepository, ReviewRepository
 from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
 
 from item_service.cache.redis_client_factory import RedisClientFactory
@@ -38,7 +36,6 @@ factory = ApplicationFactory(application_class=Application,
 
                              cache_client_factory_class=RedisClientFactory,
                              cache_connection_pool_class=ConnectionPool,
-                             cache_config_path="item_service/config/cache/cache_config.json"
-                             )
+                             cache_config_path="item_service/config/cache/cache_config.json")
 # === Entrypoint ===
 app = factory.create().asgi_app()

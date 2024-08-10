@@ -21,10 +21,6 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from loguru import logger
 
-from dataclasses import asdict
-
-from redis.asyncio.connection import ConnectionPool
-
 import json
 
 
@@ -53,7 +49,6 @@ class ApplicationFactory(BaseFactory):
 
                  cache_config_path: str = None,
                  cache_client_factory_class: BaseCacheClientFactory.__class__ = None,
-                 cache_connection_pool_class: ConnectionPool.__class__ | Any = None
                  ):
 
         self.setup_loggers()
@@ -85,19 +80,24 @@ class ApplicationFactory(BaseFactory):
                                                                         sessionmaker=sessionmaker,
                                                                         exc_handler=repository_exc_handler)
 
-        cache_client_factory = None
-        if cache_config and cache_connection_pool_class and cache_client_factory_class:
-            cache_connection_pool = cache_connection_pool_class(**asdict(cache_config))
-            cache_client_factory = cache_client_factory_class(connection_pool=cache_connection_pool)
+        item_service_cache_client = None
+        review_service_cache_client = None
+        category_service_cache_client = None
+
+        if cache_client_factory_class is not None:
+            cache_client_factory: BaseCacheClientFactory = cache_client_factory_class(cache_config)
+            item_service_cache_client = cache_client_factory.create()
+            review_service_cache_client = cache_client_factory.create()
+            category_service_cache_client = cache_client_factory.create()
 
         item_service: BaseService = item_service_class(repository=item_repository,
-                                                       cache_client_factory=cache_client_factory)
+                                                       cache_client=item_service_cache_client)
 
         review_service: BaseService = review_service_class(repository=review_repository,
-                                                           cache_client_factory=cache_client_factory)
+                                                           cache_client=review_service_cache_client)
 
         category_service: BaseService = category_service_class(repository=category_repository,
-                                                               cache_client_factory=cache_client_factory)
+                                                               cache_client=category_service_cache_client)
 
         request_validator: RequestValidator = request_validator_class(urls=urls)
 
@@ -112,7 +112,7 @@ class ApplicationFactory(BaseFactory):
     def setup_loggers():
         logger.remove()
 
-        # file logger
+        # file error logger
         logger.add(sink="item_service/logs/err_logs.json",
                    level="ERROR",
                    format="{time:DD/MM/YYYY/HH:mm:ss} "
@@ -122,6 +122,7 @@ class ApplicationFactory(BaseFactory):
                    rotation="1 MB",
                    compression="zip")
 
+        # terminal general logger
         logger.add(sink="item_service/logs/logs.json",
                    level="INFO",
                    format="{time:DD/MM/YYYY/HH:mm:ss} "

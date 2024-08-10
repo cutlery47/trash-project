@@ -16,6 +16,7 @@ class Controller(BaseController):
                  review_service: BaseReviewService,
                  category_service: BaseService,
                  request_validator: RequestValidator):
+
         self.item_service = item_service
         self.review_service = review_service
         self.category_service = category_service

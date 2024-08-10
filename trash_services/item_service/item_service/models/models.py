@@ -11,6 +11,11 @@ from typing import Optional
 class Base(DeclarativeBase, AsyncAttrs):
     id: Mapped[pk]
 
+    def serialize(self):
+        dict_data = self.__dict__
+        dict_data.pop('_sa_instance_state', None)
+        return dict_data
+
 
 class Item(Base):
     __tablename__ = "items"

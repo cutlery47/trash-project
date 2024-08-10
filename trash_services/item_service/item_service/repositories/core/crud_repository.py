@@ -1,16 +1,11 @@
-from dataclasses import asdict
-
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
-from sqlalchemy.exc import SQLAlchemyError, NoResultFound
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, update, delete
-
-from loguru import logger
 
 from item_service.repositories.core.base_repository import BaseRepository
 from item_service.models.models import Base
 from item_service.repositories.exceptions import DataNotFoundException
 from item_service.repositories.handlers.exception_handler import RepositoryExceptionHandler
-from item_service.repositories.handlers.utils import entity_to_dict
 
 
 class CRUDRepository[Entity: Base](BaseRepository):
@@ -62,7 +57,7 @@ class CRUDRepository[Entity: Base](BaseRepository):
     async def update(self, entity: Entity, *filters) -> None:
         async with self.sessionmaker() as session:
             try:
-                dict_entity = entity_to_dict(entity)
+                dict_entity = entity.serialize()
                 query = update(self._entity_class).where(*filters).values(dict_entity)
                 future = await session.execute(query)
                 if future.rowcount == 0:
